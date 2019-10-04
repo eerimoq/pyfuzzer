@@ -1,2 +1,0 @@
-# pyfuzzer
-libFuzzer for Python
