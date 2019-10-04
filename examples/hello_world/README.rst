@@ -1,7 +1,7 @@
 About
 =====
 
-Fuzzy-test the C extension hello_world.c.
+Fuzzy-test the hello_world module.
 
 .. code-block:: text
 

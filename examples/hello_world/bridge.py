@@ -1,5 +1,6 @@
-from hello_world import tell
+#import hello_world
 
 
 def test_one_input(data):
-    tell(data)
+    raise Exception('asd')
+    hello_world.tell(data)
