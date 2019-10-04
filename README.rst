@@ -1,6 +1,8 @@
 About
 =====
 
+!!! UNDER CONSTRUCTION - DO NOT USE !!!
+
 Use `libFuzzer`_ to fuzzy-test Python 3 modules.
 
 Installation
