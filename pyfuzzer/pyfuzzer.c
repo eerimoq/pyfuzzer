@@ -19,11 +19,10 @@ static void init(PyObject **module_pp, PyObject **test_one_input_pp)
 
     if (mutator_p == NULL) {
         PyErr_Print();
-        mutator_p = PyImport_ImportModule("pyfuzzer.mutators.random");
+        mutator_p = PyImport_ImportModule("pyfuzzer2.mutators.random");
 
         if (mutator_p == NULL) {
             PyErr_Print();
-            PySys_GetObject("path");
             printf("sys.path: %s\n",
                    PyUnicode_AsUTF8(PyObject_Str(PySys_GetObject("path"))));
             exit(1);
