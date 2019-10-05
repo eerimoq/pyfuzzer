@@ -109,3 +109,4 @@ examples/*/mutator.py
 *.profdata
 *.profraw
 crash-*
+corpus

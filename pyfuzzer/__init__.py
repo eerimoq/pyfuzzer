@@ -22,22 +22,18 @@ PyMODINIT_FUNC pyfuzzer_module_init(void)
 '''
 
 
-def run_pkg_config(option):
-    command = ['pkg-config', option, 'python3']
-
-    try:
-        return run_command_stdout(command)
-    except Exception:
-        return ''
+def mkdir_p(name):
+    if not os.path.exists(name):
+        os.makedirs(name)
 
 
-def default_cflags():
+def includes():
     include = sysconfig.get_path('include')
 
     return [f'-I{include}']
 
 
-def default_ldflags():
+def ldflags():
     ldflags = sysconfig.get_config_var('LDFLAGS')
     ldversion = sysconfig.get_config_var('LDVERSION')
     ldflags += f' -lpython{ldversion}'
@@ -49,12 +45,6 @@ def run_command(command, env=None):
     print(' '.join(command))
 
     subprocess.check_call(command, env=env)
-
-
-def run_command_stdout(command):
-    print(' '.join(command))
-
-    return subprocess.check_output(command).decode('ascii').strip()
 
 
 def generate(module_name, mutator):
@@ -75,13 +65,13 @@ def build(module_name, csources):
         '-fsanitize=signed-integer-overflow',
         '-fno-sanitize-recover=all'
     ]
-    command += default_cflags()
+    command += includes()
     command += csources
     command += [
         'module.c',
         os.path.join(SCRIPT_DIR, 'pyfuzzer.c')
     ]
-    command += default_ldflags()
+    command += ldflags()
     command += [
         '-o', module_name
     ]
@@ -91,8 +81,10 @@ def build(module_name, csources):
 
 def run(name, maximum_execution_time):
     run_command(['rm', '-f', f'{name}.profraw'])
+    mkdir_p('corpus')
     command = [
         f'./{name}',
+        'corpus',
         f'-max_total_time={maximum_execution_time}',
         '-max_len=4096'
     ]
