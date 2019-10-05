@@ -10,20 +10,33 @@ static void init(PyObject **module_pp,
 
     Py_Initialize();
 
+    printf("Importing module under test... ");
     *module_pp = pyfuzzer_module_init();
 
-    if (*module_pp == NULL) {
+    if (*module_pp != NULL) {
+        printf("done.\n");
+    } else {
+        printf("failed.\n");
         PyErr_Print();
         exit(1);
     }
 
+    printf("Importing custom mutator... ");
     mutator_p = PyImport_ImportModule("mutator");
 
-    if (mutator_p == NULL) {
+    if (mutator_p != NULL) {
+        printf("done.\n");
+    } else {
+        printf("failed.\n");
         PyErr_Print();
+
+        printf("Importing mutator 'pyfuzzer.mutators.random'... ");
         mutator_p = PyImport_ImportModule("pyfuzzer.mutators.random");
 
-        if (mutator_p == NULL) {
+        if (mutator_p != NULL) {
+            printf("done.\n");
+        } else {
+            printf("failed.\n");
             PyErr_Print();
             printf("sys.path: %s\n",
                    PyUnicode_AsUTF8(PyObject_Str(PySys_GetObject("path"))));
@@ -31,9 +44,13 @@ static void init(PyObject **module_pp,
         }
     }
 
+    printf("Finding function 'test_one_input' in mutator... ");
     *test_one_input_pp = PyObject_GetAttrString(mutator_p, "test_one_input");
 
-    if (*test_one_input_pp == NULL) {
+    if (*test_one_input_pp != NULL) {
+        printf("done.\n");
+    } else {
+        printf("failed.\n");
         PyErr_Print();
         exit(1);
     }
