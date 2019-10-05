@@ -8,7 +8,7 @@ Use `libFuzzer`_ to fuzzy-test Python C extension modules.
 Ideas
 =====
 
-- Use type annotations for less type errors.
+- Use type annotations for less type errors in generic mutator.
 
 - Add support to fuzzy test pure Python modules by generating C code
   from them using Cython.
