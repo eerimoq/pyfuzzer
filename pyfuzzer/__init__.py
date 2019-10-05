@@ -46,7 +46,7 @@ def build(module_name, python, csource):
         '-fsanitize=signed-integer-overflow',
         '-fno-sanitize-recover=all'
     ]
-    cflags += run_command_stdout([f'{python}-config', '--cflags']).split()
+    cflags += run_command_stdout([f'{python}-config', '--includes']).split()
     sources = [
         csource,
         'module.c',
@@ -55,6 +55,7 @@ def build(module_name, python, csource):
     command = ['clang']
     command += cflags
     command += sources
+    command += run_command_stdout([f'{python}-config', '--ldflags']).split()
     command += run_command_stdout([f'{python}-config', '--libs']).split()
     command += [
         '-o', module_name
