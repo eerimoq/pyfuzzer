@@ -1,6 +1,6 @@
 test:
 	cd examples/hello_world && \
-	    PYTHONPATH=../.. python3 -m pyfuzzer hello_world.c
+	    PYTHONPATH=../.. python3 -m pyfuzzer hello_world hello_world.c
 
 release-to-pypi:
 	python setup.py sdist

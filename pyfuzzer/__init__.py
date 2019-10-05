@@ -12,7 +12,7 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 MODULE_SRC = '''\
 #include <Python.h>
 
-extern PyMODINIT_FUNC PyInit_hello_world(void);
+extern PyMODINIT_FUNC PyInit_{module_name}(void);
 
 PyMODINIT_FUNC pyfuzzer_module_init(void)
 {{
@@ -61,7 +61,7 @@ def generate(module_name):
         fout.write(MODULE_SRC.format(module_name=module_name))
 
 
-def build(module_name, csource):
+def build(module_name, csources):
     command = ['clang']
     command += [
         '-fprofile-instr-generate',
@@ -72,8 +72,8 @@ def build(module_name, csource):
         '-fno-sanitize-recover=all'
     ]
     command += default_cflags()
+    command += csources
     command += [
-        csource,
         'module.c',
         os.path.join(SCRIPT_DIR, 'pyfuzzer.c')
     ]
@@ -111,9 +111,9 @@ def run(name, maximum_execution_time):
 
 
 def do(args):
-    module_name = os.path.splitext(os.path.basename(args.csource))[0]
+    module_name = args.modulename
     generate(module_name)
-    build(module_name, args.csource)
+    build(module_name, args.csources)
     run(module_name, args.maximum_execution_time)
 
 
@@ -131,10 +131,8 @@ def main():
         type=int,
         default=1,
         help='Maximum execution time in seconds (default: %(default)s).')
-    parser.add_argument(
-        'csource',
-        help=('C extension source file. The name of the module must be the '
-              'same as the file name without suffix.'))
+    parser.add_argument('modulename', help='C extension module name.')
+    parser.add_argument('csources', nargs='+', help='C extension source files.')
 
     args = parser.parse_args()
 
