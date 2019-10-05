@@ -105,7 +105,8 @@ def run(name, maximum_execution_time):
         'llvm-cov',
         'show',
         name,
-        f'-instr-profile={name}.profdata'
+        f'-instr-profile={name}.profdata',
+        '-ignore-filename-regex=/usr/include|pyfuzzer.c|module.c'
     ])
 
 
