@@ -4,5 +4,4 @@ python:
   - "3.7"
 
 script:
-  - python -m sysconfig
   - cd examples/hello_world && PYTHONPATH=../.. python -m pyfuzzer hello_world.c
