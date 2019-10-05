@@ -4,6 +4,11 @@ python:
   - "3.7"
 
 script:
-  - cd examples/hello_world && \
-        PYTHONPATH=../.. \
-            python -m pyfuzzer hello_world.c
+  - ls -lR /home/travis/virtualenv/python3.7.1 ; true
+  - python-config --includes ; true
+  - cd examples/hello_world &&
+        PYTHONPATH=../..
+            python -m pyfuzzer
+            --cflags "-I"
+            --ldflags "-lpython3.7"
+            hello_world.c
