@@ -10,7 +10,7 @@ Ideas
 
 - Use type annotations for less type errors.
 
-- Add support to fuzzt test pure Python modules by generating C code
+- Add support to fuzzy test pure Python modules by generating C code
   from them using Cython.
 
 Installation
