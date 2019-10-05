@@ -103,8 +103,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-examples/hello_world/hello_world.c
-examples/hello_world/hello_world_fuzzer
+examples/hello_world/module.c
+examples/hello_world/hello_world
 *.profdata
 *.profraw
 crash-*

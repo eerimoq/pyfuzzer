@@ -5,4 +5,4 @@ Fuzzy-test the hello_world module.
 
 .. code-block:: text
 
-   $ make
+   $ pyfuzzer hello_world.c

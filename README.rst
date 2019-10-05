@@ -3,24 +3,28 @@ About
 
 !!! UNDER CONSTRUCTION - DO NOT USE !!!
 
-Use `libFuzzer`_ to fuzzy-test Python 3 modules.
+Use `libFuzzer`_ to fuzzy-test Python C extension modules.
+
+Ideas
+=====
+
+- Use type annotations for less type errors.
+
+- Add support to fuzzt test pure Python modules by generating C code
+  from them using Cython.
 
 Installation
 ============
 
 .. code-block:: text
 
+   $ apt install clang
    $ pip install pyfuzzer
 
 Example Usage
 =============
 
-Use the default mutator when testing the module hello_world. Cython is
-used to generate C code from Python code.
-
-Testing with the default mutator is often very inefficient as Python
-is such a dynamic language. A custom mutator is often needed for
-efficient testing.
+Use the default generic mutator when testing the module hello_world.
 
 .. code-block:: text
 
@@ -30,10 +34,13 @@ efficient testing.
 
 Use a custom mutator when testing the module hello_world.
 
+Testing with a custom mutator is often more efficient then using a
+generic.
+
 .. code-block:: text
 
    $ cd examples/hello_world
-   $ pyfuzzer -m mutator hello_world.c
+   $ pyfuzzer -m mutator.py hello_world.c
    ...
 
 .. _libFuzzer: https://llvm.org/docs/LibFuzzer.html
