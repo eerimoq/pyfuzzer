@@ -87,10 +87,9 @@ def build(module_name, csource):
 
 def run(name):
     run_command(['rm', '-f', f'{name}.profraw'])
-    run_command([f'./{name}', '-max_total_time=5', '-max_len=4096'],
-                   env={
-                       'LLVM_PROFILE_FILE': f'{name}.profraw'
-                   })
+    env = os.environ.copy()
+    env['LLVM_PROFILE_FILE'] = f'{name}.profraw'
+    run_command([f'./{name}', '-max_total_time=5', '-max_len=4096'], env=env)
     run_command([
         'llvm-profdata',
         'merge',

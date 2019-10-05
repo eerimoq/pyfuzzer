@@ -19,7 +19,7 @@ static void init(PyObject **module_pp, PyObject **test_one_input_pp)
 
     if (mutator_p == NULL) {
         PyErr_Print();
-        mutator_p = PyImport_ImportModule("pyfuzzer2.mutators.random");
+        mutator_p = PyImport_ImportModule("pyfuzzer.mutators.random");
 
         if (mutator_p == NULL) {
             PyErr_Print();
