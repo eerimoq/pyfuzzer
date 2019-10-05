@@ -3,8 +3,6 @@
 About
 =====
 
-!!! UNDER CONSTRUCTION - DO NOT USE !!!
-
 Use `libFuzzer`_ to fuzz test Python 3.6+ C extension modules.
 
 Ideas
