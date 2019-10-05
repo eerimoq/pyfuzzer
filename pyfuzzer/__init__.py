@@ -37,7 +37,7 @@ def generate(module_name):
         fout.write(MODULE_SRC.format(module_name=module_name))
 
 
-def build(module_name, csource):
+def build(module_name, python, csource):
     cflags = [
         '-fprofile-instr-generate',
         '-fcoverage-mapping',
@@ -46,7 +46,7 @@ def build(module_name, csource):
         '-fsanitize=signed-integer-overflow',
         '-fno-sanitize-recover=all'
     ]
-    cflags += run_command_stdout(['pkg-config', '--cflags', 'python3']).split()
+    cflags += run_command_stdout(['pkg-config', '--cflags', python]).split()
     sources = [
         csource,
         'module.c',
@@ -55,7 +55,7 @@ def build(module_name, csource):
     command = ['clang']
     command += cflags
     command += sources
-    command += run_command_stdout(['pkg-config', '--libs', 'python3']).split()
+    command += run_command_stdout(['pkg-config', '--libs', python]).split()
     command += [
         '-o', module_name
     ]
@@ -86,7 +86,7 @@ def run(name):
 def do(args):
     module_name = os.path.splitext(os.path.basename(args.csource))[0]
     generate(module_name)
-    build(module_name, args.csource)
+    build(module_name, args.python, args.csource)
     run(module_name)
 
 
@@ -99,6 +99,9 @@ def main():
                         version=__version__,
                         help='Print version information and exit.')
     parser.add_argument('-m', '--mutator', help='Mutator module.')
+    parser.add_argument('-p', '--python',
+                        default='python3',
+                        help='Python executable (default: %(default)s).')
     parser.add_argument(
         'csource',
         help=('C extension source file. The name of the module must be the '

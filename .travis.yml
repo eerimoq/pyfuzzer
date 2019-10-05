@@ -4,4 +4,4 @@ python:
   - "3.7"
 
 script:
-  - make test
+  - cd examples/hello_world && PYTHONPATH=../.. python -m pyfuzzer -p python hello_world.c
