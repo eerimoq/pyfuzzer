@@ -85,11 +85,16 @@ def build(module_name, csource):
     run_command(command)
 
 
-def run(name):
+def run(name, maximum_execution_time):
     run_command(['rm', '-f', f'{name}.profraw'])
+    command = [
+        f'./{name}',
+        f'-max_total_time={maximum_execution_time}',
+        '-max_len=4096'
+    ]
     env = os.environ.copy()
     env['LLVM_PROFILE_FILE'] = f'{name}.profraw'
-    run_command([f'./{name}', '-max_total_time=5', '-max_len=4096'], env=env)
+    run_command(command, env=env)
     run_command([
         'llvm-profdata',
         'merge',
@@ -108,7 +113,7 @@ def do(args):
     module_name = os.path.splitext(os.path.basename(args.csource))[0]
     generate(module_name)
     build(module_name, args.csource)
-    run(module_name)
+    run(module_name, args.maximum_execution_time)
 
 
 def main():
@@ -120,6 +125,11 @@ def main():
                         version=__version__,
                         help='Print version information and exit.')
     parser.add_argument('-m', '--mutator', help='Mutator module.')
+    parser.add_argument(
+        '-t', '--maximum-execution-time',
+        type=int,
+        default=1,
+        help='Maximum execution time in seconds (default: %(default)s).')
     parser.add_argument(
         'csource',
         help=('C extension source file. The name of the module must be the '
