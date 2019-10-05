@@ -1,3 +1,5 @@
+|buildstatus|_
+
 About
 =====
 
@@ -121,5 +123,8 @@ generic.
    $ cd examples/hello_world
    $ pyfuzzer -m mutator.py hello_world.c
    ...
+
+.. |buildstatus| image:: https://travis-ci.org/eerimoq/pyfuzzer.svg
+.. _buildstatus: https://travis-ci.org/eerimoq/pyfuzzer
 
 .. _libFuzzer: https://llvm.org/docs/LibFuzzer.html
