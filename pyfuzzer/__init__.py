@@ -3,6 +3,7 @@ import os
 import argparse
 import subprocess
 import sysconfig
+import shutil
 
 from .version import __version__
 
@@ -56,9 +57,12 @@ def run_command_stdout(command):
     return subprocess.check_output(command).decode('ascii').strip()
 
 
-def generate(module_name):
+def generate(module_name, mutator):
     with open('module.c', 'w') as fout:
         fout.write(MODULE_SRC.format(module_name=module_name))
+
+    if mutator is not None:
+        shutil.copyfile(mutator, 'mutator.py')
 
 
 def build(module_name, csources):
@@ -112,7 +116,7 @@ def run(name, maximum_execution_time):
 
 def do(args):
     module_name = args.modulename
-    generate(module_name)
+    generate(module_name, args.mutator)
     build(module_name, args.csources)
     run(module_name, args.maximum_execution_time)
 
