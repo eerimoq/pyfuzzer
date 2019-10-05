@@ -5,14 +5,14 @@ About
 
 !!! UNDER CONSTRUCTION - DO NOT USE !!!
 
-Use `libFuzzer`_ to fuzzy-test Python C extension modules.
+Use `libFuzzer`_ to fuzz test Python C extension modules.
 
 Ideas
 =====
 
 - Use type annotations for less type errors in generic mutator.
 
-- Add support to fuzzy test pure Python modules by generating C code
+- Add support to fuzz test pure Python modules by generating C code
   from them using Cython.
 
 Installation
