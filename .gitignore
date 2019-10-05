@@ -104,3 +104,7 @@ venv.bak/
 .mypy_cache/
 
 examples/hello_world/hello_world.c
+examples/hello_world/hello_world_fuzzer
+*.profdata
+*.profraw
+crash-*

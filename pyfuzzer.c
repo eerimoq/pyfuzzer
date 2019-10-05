@@ -3,20 +3,30 @@
 #include <string.h>
 #include <Python.h>
 
-static void init(PyObject **test_one_input_pp)
+extern PyObject *PyInit_hello_world(void);
+
+static void init(PyObject **module_pp, PyObject **test_one_input_pp)
 {
-    PyObject *bridge_p;
+    PyObject *mutator_p;
 
     Py_Initialize();
 
-    bridge_p = PyImport_ImportModule("bridge");
+    //*module_pp = PyInit_hello_world();
+    *module_pp = PyImport_ImportModule("hello_world");
 
-    if (bridge_p == NULL) {
+    if (*module_pp == NULL) {
         PyErr_Print();
         exit(1);
     }
 
-    *test_one_input_pp = PyObject_GetAttrString(bridge_p, "test_one_input");
+    mutator_p = PyImport_ImportModule("mutator");
+
+    if (mutator_p == NULL) {
+        PyErr_Print();
+        exit(1);
+    }
+
+    *test_one_input_pp = PyObject_GetAttrString(mutator_p, "test_one_input");
 
     if (*test_one_input_pp == NULL) {
         PyErr_Print();
@@ -26,6 +36,7 @@ static void init(PyObject **test_one_input_pp)
 
 int LLVMFuzzerTestOneInput(const uint8_t *data_p, size_t size)
 {
+    static PyObject *module_p = NULL;
     static PyObject *test_one_input_p = NULL;
     PyObject *func_p;
     PyObject *res_p;
@@ -33,13 +44,15 @@ int LLVMFuzzerTestOneInput(const uint8_t *data_p, size_t size)
     PyObject *data_obj_p;
     const char *name_p;
 
-    if (test_one_input_p == NULL) {
-        init(&test_one_input_p);
+    if (module_p == NULL) {
+        init(&module_p, &test_one_input_p);
     }
 
-    args_p = PyTuple_New(1);
+    args_p = PyTuple_New(2);
+    Py_INCREF(module_p);
+    PyTuple_SET_ITEM(args_p, 0, module_p);
     PyTuple_SET_ITEM(args_p,
-                     0,
+                     1,
                      PyBytes_FromStringAndSize((const char *)data_p,
                                                size));
     PyErr_Clear();
@@ -47,8 +60,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data_p, size_t size)
     Py_DECREF(args_p);
 
     if (res_p != NULL) {
+        //printf("res: %s\n", PyUnicode_AsUTF8(PyObject_Str(res_p)));
         Py_DECREF(res_p);
-        printf("res: %s\n", PyUnicode_AsUTF8(PyObject_Str(res_p)));
     } else if (!PyErr_Occurred()) {
         exit(2);
     } else {
