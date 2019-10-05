@@ -2,6 +2,7 @@ import sys
 import os
 import argparse
 import subprocess
+import sysconfig
 
 from .version import __version__
 
@@ -30,11 +31,17 @@ def run_pkg_config(option):
 
 
 def default_cflags():
-    return run_pkg_config('--cflags')
+    include = sysconfig.get_path('include')
+
+    return [f'-I{include}']
 
 
 def default_ldflags():
-    return run_pkg_config('--libs')
+    ldflags = sysconfig.get_config_var('LDFLAGS')
+    ldversion = sysconfig.get_config_var('LDVERSION')
+    ldflags += f' -lpython{ldversion}'
+
+    return ldflags.split()
 
 
 def run_command(command, env=None):
@@ -54,7 +61,7 @@ def generate(module_name):
         fout.write(MODULE_SRC.format(module_name=module_name))
 
 
-def build(module_name, csource, cflags, ldflags):
+def build(module_name, csource):
     command = ['clang']
     command += [
         '-fprofile-instr-generate',
@@ -64,19 +71,13 @@ def build(module_name, csource, cflags, ldflags):
         '-fsanitize=signed-integer-overflow',
         '-fno-sanitize-recover=all'
     ]
-
-    if cflags:
-        command += cflags.split()
-
+    command += default_cflags()
     command += [
         csource,
         'module.c',
         os.path.join(SCRIPT_DIR, 'pyfuzzer.c')
     ]
-
-    if ldflags:
-        command += ldflags.split()
-
+    command += default_ldflags()
     command += [
         '-o', module_name
     ]
@@ -107,7 +108,7 @@ def run(name):
 def do(args):
     module_name = os.path.splitext(os.path.basename(args.csource))[0]
     generate(module_name)
-    build(module_name, args.csource, args.cflags, args.ldflags)
+    build(module_name, args.csource)
     run(module_name)
 
 
@@ -120,12 +121,6 @@ def main():
                         version=__version__,
                         help='Print version information and exit.')
     parser.add_argument('-m', '--mutator', help='Mutator module.')
-    parser.add_argument('--cflags',
-                        default=default_cflags(),
-                        help='Compiler flags (default: %(default)s).')
-    parser.add_argument('--ldflags',
-                        default=default_ldflags(),
-                        help='Linker flags (default: %(default)s).')
     parser.add_argument(
         'csource',
         help=('C extension source file. The name of the module must be the '
