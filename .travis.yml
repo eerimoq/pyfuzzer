@@ -4,8 +4,4 @@ python:
   - "3.7"
 
 script:
-  - python-config --cflags ; true
-  - python3-config --cflags ; true
-  - python3.7-config --cflags ; true
-  - python3.7.1-config --cflags ; true
-  - cd examples/hello_world && PYTHONPATH=../.. python -m pyfuzzer -p python3.7.1 hello_world.c
+  - cd examples/hello_world && PYTHONPATH=../.. python -m pyfuzzer -p python hello_world.c
