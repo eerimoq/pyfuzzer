@@ -39,11 +39,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data_p, size_t size)
 {
     static PyObject *module_p = NULL;
     static PyObject *test_one_input_p = NULL;
-    PyObject *func_p;
     PyObject *res_p;
     PyObject *args_p;
-    PyObject *data_obj_p;
-    const char *name_p;
 
     if (module_p == NULL) {
         init(&module_p, &test_one_input_p);
