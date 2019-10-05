@@ -62,11 +62,6 @@ int LLVMFuzzerTestOneInput(const uint8_t *data_p, size_t size)
     if (res_p != NULL) {
         // printf("res: %s\n", PyUnicode_AsUTF8(PyObject_Str(res_p)));
         Py_DECREF(res_p);
-    } else if (!PyErr_Occurred()) {
-        exit(2);
-    } else {
-        PyErr_Print();
-        exit(3);
     }
 
     return (0);

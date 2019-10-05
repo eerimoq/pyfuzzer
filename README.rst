@@ -31,7 +31,7 @@ Use the default generic mutator when testing the module hello_world.
 .. code-block:: text
 
    $ cd examples/hello_world
-   $ pyfuzzer hello_world.c
+   $ pyfuzzer hello_world hello_world.c
    clang -fprofile-instr-generate -fcoverage-mapping -g -fsanitize=fuzzer -fsanitize=signed-integer-overflow -fno-sanitize-recover=all -I/usr/include/python3.7m hello_world.c module.c /home/erik/workspace/pyfuzzer/pyfuzzer/pyfuzzer.c -Wl,-Bsymbolic-functions -Wl,-z,relro -lpython3.7m -o hello_world
    rm -f hello_world.profraw
    ./hello_world -max_total_time=1 -max_len=4096
@@ -117,7 +117,7 @@ generic.
 .. code-block:: text
 
    $ cd examples/hello_world
-   $ pyfuzzer -m mutator.py hello_world.c
+   $ pyfuzzer -m mutator.py hello_world hello_world.c
    ...
 
 .. |buildstatus| image:: https://travis-ci.org/eerimoq/pyfuzzer.svg
