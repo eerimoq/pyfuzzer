@@ -4,4 +4,6 @@ python:
   - "3.7"
 
 script:
+  - python-config --ldflags
+  - python-config --includes
   - cd examples/hello_world && PYTHONPATH=../.. python -m pyfuzzer -p python hello_world.c
