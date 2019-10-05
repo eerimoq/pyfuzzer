@@ -1,9 +1,6 @@
-#include <stdint.h>
-#include <stddef.h>
-#include <string.h>
 #include <Python.h>
 
-extern PyObject *PyInit_hello_world(void);
+extern PyObject *pyfuzzer_module_init(void);
 
 static void init(PyObject **module_pp, PyObject **test_one_input_pp)
 {
@@ -11,8 +8,7 @@ static void init(PyObject **module_pp, PyObject **test_one_input_pp)
 
     Py_Initialize();
 
-    //*module_pp = PyInit_hello_world();
-    *module_pp = PyImport_ImportModule("hello_world");
+    *module_pp = pyfuzzer_module_init();
 
     if (*module_pp == NULL) {
         PyErr_Print();
@@ -23,7 +19,12 @@ static void init(PyObject **module_pp, PyObject **test_one_input_pp)
 
     if (mutator_p == NULL) {
         PyErr_Print();
-        exit(1);
+        mutator_p = PyImport_ImportModule("pyfuzzer.mutators.random");
+
+        if (mutator_p == NULL) {
+            PyErr_Print();
+            exit(1);
+        }
     }
 
     *test_one_input_pp = PyObject_GetAttrString(mutator_p, "test_one_input");
@@ -60,12 +61,13 @@ int LLVMFuzzerTestOneInput(const uint8_t *data_p, size_t size)
     Py_DECREF(args_p);
 
     if (res_p != NULL) {
-        //printf("res: %s\n", PyUnicode_AsUTF8(PyObject_Str(res_p)));
+        // printf("res: %s\n", PyUnicode_AsUTF8(PyObject_Str(res_p)));
         Py_DECREF(res_p);
     } else if (!PyErr_Occurred()) {
         exit(2);
     } else {
         PyErr_Print();
+        exit(3);
     }
 
     return (0);

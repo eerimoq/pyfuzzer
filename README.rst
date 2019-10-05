@@ -25,7 +25,7 @@ efficient testing.
 .. code-block:: text
 
    $ cd examples/hello_world
-   $ pyfuzzer hello_world
+   $ pyfuzzer hello_world.c
    ...
 
 Use a custom mutator when testing the module hello_world.
@@ -33,7 +33,7 @@ Use a custom mutator when testing the module hello_world.
 .. code-block:: text
 
    $ cd examples/hello_world
-   $ pyfuzzer -f mutator hello_world
+   $ pyfuzzer -m mutator hello_world.c
    ...
 
 .. _libFuzzer: https://llvm.org/docs/LibFuzzer.html
