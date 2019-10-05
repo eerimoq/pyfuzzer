@@ -11,23 +11,35 @@ static PyObject *m_tell(PyObject *module_p, PyObject *message_p)
     Py_ssize_t size;
     char* buf_p;
     int res;
+    PyObject *res_p;
 
     res = PyBytes_AsStringAndSize(message_p, &buf_p, &size);
 
     if (res != -1) {
-        if ((size > 0) && (buf_p[0] == 'H')) {
-            if ((size > 1) && (buf_p[1] == 'i')) {
-                if ((size > 2) && (buf_p[2] == '!')) {
-                    printf("\"Hi!\" found!\n");
-                    abort();
-                }
-            }
-        }
-    }
-    
-    Py_INCREF(Py_None);
+        switch (size) {
 
-    return (Py_None);
+        case 0:
+            res_p = PyLong_FromLong(5);
+            break;
+
+        case 1:
+            res_p = PyBool_FromLong(1);
+            break;
+
+        case 2:
+            res_p = PyBytes_FromString("Hello!");
+            break;
+
+        default:
+            res_p = PyLong_FromLong(0);
+            break;
+        }
+    } else {
+        Py_INCREF(Py_None);
+        res_p = Py_None;
+    }
+
+    return (res_p);
 }
 
 static struct PyMethodDef methods[] = {
