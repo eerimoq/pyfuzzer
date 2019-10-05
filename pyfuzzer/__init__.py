@@ -20,6 +20,23 @@ PyMODINIT_FUNC pyfuzzer_module_init(void)
 '''
 
 
+def run_pkg_config(option):
+    command = ['pkg-config', option, 'python3']
+
+    try:
+        return run_command_stdout(command)
+    except Exception:
+        return ''
+
+
+def default_cflags():
+    return run_pkg_config('--cflags')
+
+
+def default_ldflags():
+    return run_pkg_config('--libs')
+
+
 def run_command(command, env=None):
     print(' '.join(command))
 
@@ -29,7 +46,7 @@ def run_command(command, env=None):
 def run_command_stdout(command):
     print(' '.join(command))
 
-    return subprocess.check_output(command).decode('ascii')
+    return subprocess.check_output(command).decode('ascii').strip()
 
 
 def generate(module_name):
@@ -37,8 +54,9 @@ def generate(module_name):
         fout.write(MODULE_SRC.format(module_name=module_name))
 
 
-def build(module_name, python, csource):
-    cflags = [
+def build(module_name, csource, cflags, ldflags):
+    command = ['clang']
+    command += [
         '-fprofile-instr-generate',
         '-fcoverage-mapping',
         '-g',
@@ -46,17 +64,19 @@ def build(module_name, python, csource):
         '-fsanitize=signed-integer-overflow',
         '-fno-sanitize-recover=all'
     ]
-    cflags += run_command_stdout([f'{python}-config', '--includes']).split()
-    sources = [
+
+    if cflags:
+        command += cflags.split()
+
+    command += [
         csource,
         'module.c',
         os.path.join(SCRIPT_DIR, 'pyfuzzer.c')
     ]
-    command = ['clang']
-    command += cflags
-    command += sources
-    command += run_command_stdout([f'{python}-config', '--ldflags']).split()
-    command += run_command_stdout([f'{python}-config', '--libs']).split()
+
+    if ldflags:
+        command += ldflags.split()
+
     command += [
         '-o', module_name
     ]
@@ -87,7 +107,7 @@ def run(name):
 def do(args):
     module_name = os.path.splitext(os.path.basename(args.csource))[0]
     generate(module_name)
-    build(module_name, args.python, args.csource)
+    build(module_name, args.csource, args.cflags, args.ldflags)
     run(module_name)
 
 
@@ -100,9 +120,12 @@ def main():
                         version=__version__,
                         help='Print version information and exit.')
     parser.add_argument('-m', '--mutator', help='Mutator module.')
-    parser.add_argument('-p', '--python',
-                        default='python3',
-                        help='Python executable (default: %(default)s).')
+    parser.add_argument('--cflags',
+                        default=default_cflags(),
+                        help='Compiler flags (default: %(default)s).')
+    parser.add_argument('--ldflags',
+                        default=default_ldflags(),
+                        help='Linker flags (default: %(default)s).')
     parser.add_argument(
         'csource',
         help=('C extension source file. The name of the module must be the '
