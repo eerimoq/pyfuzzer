@@ -6,6 +6,8 @@ import subprocess
 from .version import __version__
 
 
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
 MODULE_SRC = '''\
 #include <Python.h>
 
@@ -20,34 +22,41 @@ PyMODINIT_FUNC pyfuzzer_module_init(void)
 
 def run_command(command, env=None):
     print(' '.join(command))
+
     subprocess.check_call(command, env=env)
+
+
+def run_command_stdout(command):
+    print(' '.join(command))
+
+    return subprocess.check_output(command).decode('ascii')
 
 
 def generate(module_name):
     with open('module.c', 'w') as fout:
         fout.write(MODULE_SRC.format(module_name=module_name))
 
-        
+
 def build(module_name, csource):
     cflags = [
         '-fprofile-instr-generate',
         '-fcoverage-mapping',
-        '-I/usr/include/python3.7m',
         '-g',
         '-fsanitize=fuzzer',
         '-fsanitize=signed-integer-overflow',
         '-fno-sanitize-recover=all'
     ]
+    cflags += run_command_stdout(['pkg-config', '--cflags', 'python3']).split()
     sources = [
         csource,
         'module.c',
-        '../../pyfuzzer/pyfuzzer.c'
+        os.path.join(SCRIPT_DIR, 'pyfuzzer.c')
     ]
     command = ['clang']
     command += cflags
     command += sources
+    command += run_command_stdout(['pkg-config', '--libs', 'python3']).split()
     command += [
-        '-lpython3.7m',
         '-o', module_name
     ]
 
