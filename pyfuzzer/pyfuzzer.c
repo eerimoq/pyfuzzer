@@ -2,7 +2,9 @@
 
 extern PyObject *pyfuzzer_module_init(void);
 
-static void init(PyObject **module_pp, PyObject **test_one_input_pp)
+static void init(PyObject **module_pp,
+                 PyObject **test_one_input_pp,
+                 PyObject **args_pp)
 {
     PyObject *mutator_p;
 
@@ -35,29 +37,41 @@ static void init(PyObject **module_pp, PyObject **test_one_input_pp)
         PyErr_Print();
         exit(1);
     }
+
+    *args_pp = PyTuple_New(2);
+
+    if (*args_pp == NULL) {
+        PyErr_Print();
+        exit(1);
+    }
+
+    Py_INCREF(*module_pp);
+    PyTuple_SET_ITEM(*args_pp, 0, *module_pp);
 }
 
 int LLVMFuzzerTestOneInput(const uint8_t *data_p, size_t size)
 {
     static PyObject *module_p = NULL;
     static PyObject *test_one_input_p = NULL;
+    static PyObject *args_p;
     PyObject *res_p;
-    PyObject *args_p;
+    PyObject *data_obj_p;
 
     if (module_p == NULL) {
-        init(&module_p, &test_one_input_p);
+        init(&module_p, &test_one_input_p, &args_p);
     }
 
-    args_p = PyTuple_New(2);
-    Py_INCREF(module_p);
-    PyTuple_SET_ITEM(args_p, 0, module_p);
-    PyTuple_SET_ITEM(args_p,
-                     1,
-                     PyBytes_FromStringAndSize((const char *)data_p,
-                                               size));
+    data_obj_p = PyBytes_FromStringAndSize((const char *)data_p, size);
+
+    if (data_obj_p == NULL) {
+        PyErr_Print();
+        exit(1);
+    }
+
+    PyTuple_SET_ITEM(args_p, 1, data_obj_p);
     PyErr_Clear();
     res_p = PyObject_CallObject(test_one_input_p, args_p);
-    Py_DECREF(args_p);
+    Py_DECREF(data_obj_p);
 
     if (res_p != NULL) {
         // printf("res: %s\n", PyUnicode_AsUTF8(PyObject_Str(res_p)));
