@@ -4,10 +4,13 @@ from io import BytesIO
 import struct
 
 from .utils import print_function
+from .utils import print_class
 
 
 FUNCS = None
 NUMBER_OF_FUNCS = 0
+CLASSES = None
+NUMBER_OF_CLASSES = 0
 
 
 def generate_integer(data):
@@ -49,14 +52,28 @@ def lookup_function(module, value):
         ]
         NUMBER_OF_FUNCS = len(FUNCS)
 
-        if NUMBER_OF_FUNCS == 0:
-            print('No functions.')
-            sys.exit(1)
-        elif NUMBER_OF_FUNCS > 256:
+        if NUMBER_OF_FUNCS > 256:
             print('More than 256 functions.')
             sys.exit(1)
 
-    return FUNCS[value % len(FUNCS)]
+    return FUNCS[value % NUMBER_OF_FUNCS]
+
+
+def lookup_class(module, value):
+    global CLASSES
+    global NUMBER_OF_CLASSES
+
+    if CLASSES is None:
+        CLASSES = [
+            m[1] for m in inspect.getmembers(module, inspect.isclass)
+        ]
+        NUMBER_OF_CLASSES = len(CLASSES)
+
+        if NUMBER_OF_CLASSES > 256:
+            print('More than 256 classes.')
+            sys.exit(1)
+
+    return CLASSES[value % NUMBER_OF_CLASSES]
 
 
 def generate_args(data):
@@ -69,6 +86,42 @@ def generate_args(data):
     return args
 
 
+def test_one_function(module, data):
+    func = lookup_function(module, data.read(1)[0])
+    args = generate_args(data)
+    func(*args)
+
+
+def test_one_class(module, data):
+    cls = lookup_class(module, data.read(1)[0])
+    args = generate_args(data)
+    cls(*args)
+
+
+ATTRIBUTE_KIND = {
+    0: test_one_function,
+    1: test_one_class
+}
+
+
+def test_one_function_print(module, data):
+    func = lookup_function(module, data.read(1)[0])
+    args = generate_args(data)
+    print_function(func, args)
+
+
+def test_one_class_print(module, data):
+    cls = lookup_class(module, data.read(1)[0])
+    args = generate_args(data)
+    print_class(cls, args)
+
+
+ATTRIBUTE_KIND_PRINT = {
+    0: test_one_function_print,
+    1: test_one_class_print
+}
+
+
 def test_one_input(module, data):
     # C extension functions can not have type annotations. Can be part
     # of function documentation though.
@@ -78,15 +131,11 @@ def test_one_input(module, data):
     # print(func.__doc__)
 
     data = BytesIO(data)
-    func = lookup_function(module, data.read(1)[0])
-    args = generate_args(data)
-
-    func(*args)
+    kind = data.read(1)[0]
+    ATTRIBUTE_KIND[kind](module, data)
 
 
 def test_one_input_print(module, data):
     data = BytesIO(data)
-    func = lookup_function(module, data.read(1)[0])
-    args = generate_args(data)
-
-    print_function(func, args)
+    kind = data.read(1)[0]
+    ATTRIBUTE_KIND_PRINT[kind](module, data)

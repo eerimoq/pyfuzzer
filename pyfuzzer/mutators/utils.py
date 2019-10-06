@@ -1,8 +1,7 @@
-import sys
 import traceback
 
 
-def print_function(func, args, limit=1024):
+def format_args(args, limit):
     sargs = []
 
     for arg in args:
@@ -13,7 +12,11 @@ def print_function(func, args, limit=1024):
 
         sargs.append(arg[:limit])
 
-    fargs = ', '.join(sargs)
+    return ', '.join(sargs)
+
+
+def print_function(func, args, limit=1024):
+    fargs = format_args(args, limit)
 
     # Print and flush function name and arguments before calling the
     # function since it may crash.
@@ -21,6 +24,21 @@ def print_function(func, args, limit=1024):
 
     try:
         res = func(*args)
+        print(f' = {str(res)[:limit]}')
+    except Exception:
+        print(' raises:')
+        traceback.print_exc()
+
+
+def print_class(cls, args, limit=1024):
+    fargs = format_args(args, limit)
+
+    # Print and flush function name and arguments before calling the
+    # function since it may crash.
+    print(f'{cls.__name__}({fargs})', end='', flush=True)
+
+    try:
+        res = cls(*args)
         print(f' = {str(res)[:limit]}')
     except Exception:
         print(' raises:')
