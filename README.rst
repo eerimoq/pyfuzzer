@@ -128,29 +128,15 @@ is usually good input when writing unit tests.
 .. code-block:: text
 
    $ pyfuzzer corpus_print
-   ./pyfuzzer_print_corpus corpus/9ce9554501e0ceafdc80947723b2266c7d4465b1
-   Function:  tell
-   Arguments: [b"'"]
-   Result:    True
-   ./pyfuzzer_print_corpus corpus/eba41d971b38378309f43d49643edf0cfaab5f4d
-   Function:  tell
-   Arguments: [b"'\x03"]
-   Result:    b'Hello!'
-   ./pyfuzzer_print_corpus corpus/889343cd62dbff5263be0a245834550f8801df95
-   Function:  tell
-   Arguments: [b'']
-   Result:    5
-   ./pyfuzzer_print_corpus corpus/e29871be07980068a513c9743dba073b122796b4
-   Function:  tell
-   Arguments: [True]
+   tell(b'') = 5
+   tell(b'@') = True
+   tell(None) raises:
    Traceback (most recent call last):
-     File "/home/erik/workspace/pyfuzzer/pyfuzzer/mutators/random.py", line 94, in test_one_input_print
+     File "/home/erik/workspace/pyfuzzer/pyfuzzer/mutators/utils.py", line 18, in print_function
        res = func(*args)
-   TypeError: expected bytes, bool found
-   ./pyfuzzer_print_corpus corpus/29a45f3baa3f6e1a904010761d9d82467ba0ee1e
-   Function:  tell
-   Arguments: [b'\x03\x00\x08']
-   Result:    0
+   TypeError: expected bytes, NoneType found
+   tell(b'@\x01\x00') = 0
+   tell(b'#@') = b'Hello!'
 
 Custom mutator
 --------------
