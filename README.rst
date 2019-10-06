@@ -11,7 +11,7 @@ Ideas
 - Use type annotations for less type errors in generic mutator.
 
 - Add support to fuzz test pure Python modules by generating C code
-  from them using Cython.
+  using Cython.
 
 - Add a verbose option?
 
