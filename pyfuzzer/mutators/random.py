@@ -2,6 +2,7 @@ import sys
 import inspect
 from io import BytesIO
 import struct
+import traceback
 
 FUNCS = None
 NUMBER_OF_FUNCS = 0
@@ -79,3 +80,18 @@ def test_one_input(module, data):
     args = generate_args(data)
 
     func(*args)
+
+
+def test_one_input_print(module, data):
+    data = BytesIO(data)
+    func = lookup_function(module, data.read(1)[0])
+    args = generate_args(data)
+
+    print(f'Function:  {func.__name__}')
+    print(f"Arguments: {args}")
+
+    try:
+        res = func(*args)
+        print(f'Result:    {res}')
+    except Exception:
+        traceback.print_exc()

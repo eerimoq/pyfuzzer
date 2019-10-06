@@ -104,7 +104,8 @@ venv.bak/
 .mypy_cache/
 
 examples/*/module.c
-examples/*/hello_world
+examples/*/pyfuzzer
+examples/*/pyfuzzer_print_corpus
 examples/*/mutator.py
 *.profdata
 *.profraw

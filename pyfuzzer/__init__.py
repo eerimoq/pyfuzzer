@@ -55,7 +55,7 @@ def generate(module_name, mutator):
         shutil.copyfile(mutator, 'mutator.py')
 
 
-def build(module_name, csources):
+def build(csources):
     command = ['clang']
     command += [
         '-fprofile-instr-generate',
@@ -73,44 +73,69 @@ def build(module_name, csources):
     ]
     command += ldflags()
     command += [
-        '-o', module_name
+        '-o', 'pyfuzzer'
     ]
 
     run_command(command)
 
 
-def run(name, maximum_execution_time):
-    run_command(['rm', '-f', f'{name}.profraw'])
+def build_print_corpus(csources):
+    command = ['clang']
+    command += includes()
+    command += csources
+    command += [
+        'module.c',
+        os.path.join(SCRIPT_DIR, 'pyfuzzer_print_corpus.c')
+    ]
+    command += ldflags()
+    command += [
+        '-o', 'pyfuzzer_print_corpus'
+    ]
+
+    run_command(command)
+
+
+def run(maximum_execution_time):
+    run_command(['rm', '-f', 'pyfuzzer.profraw'])
     mkdir_p('corpus')
     command = [
-        f'./{name}',
+        './pyfuzzer',
         'corpus',
         f'-max_total_time={maximum_execution_time}',
         '-max_len=4096'
     ]
     env = os.environ.copy()
-    env['LLVM_PROFILE_FILE'] = f'{name}.profraw'
+    env['LLVM_PROFILE_FILE'] = 'pyfuzzer.profraw'
     run_command(command, env=env)
     run_command([
         'llvm-profdata',
         'merge',
-        '-sparse', f'{name}.profraw',
-        '-o', f'{name}.profdata'
+        '-sparse', 'pyfuzzer.profraw',
+        '-o', 'pyfuzzer.profdata'
     ])
     run_command([
         'llvm-cov',
         'show',
-        name,
-        f'-instr-profile={name}.profdata',
+        'pyfuzzer',
+        '-instr-profile=pyfuzzer.profdata',
         '-ignore-filename-regex=/usr/|pyfuzzer.c|module.c'
     ])
 
 
-def do(args):
-    module_name = args.modulename
-    generate(module_name, args.mutator)
-    build(module_name, args.csources)
-    run(module_name, args.maximum_execution_time)
+def do_run(args):
+    generate(args.modulename, args.mutator)
+    build(args.csources)
+    build_print_corpus(args.csources)
+    run(args.maximum_execution_time)
+
+
+def do_corpus_print(args):
+    for filename in os.listdir('corpus'):
+        run_command(['./pyfuzzer_print_corpus', os.path.join('corpus', filename)])
+
+
+def do_corpus_clear(args):
+    shutil.rmtree('corpus')
 
 
 def main():
@@ -121,21 +146,38 @@ def main():
                         action='version',
                         version=__version__,
                         help='Print version information and exit.')
-    parser.add_argument('-m', '--mutator', help='Mutator module.')
-    parser.add_argument(
+
+    # Workaround to make the subparser required in Python 3.
+    subparsers = parser.add_subparsers(title='subcommands',
+                                       dest='subcommand')
+    subparsers.required = True
+
+    # The run subparser.
+    subparser = subparsers.add_parser('run')
+    subparser.add_argument('-m', '--mutator', help='Mutator module.')
+    subparser.add_argument(
         '-t', '--maximum-execution-time',
         type=int,
         default=1,
         help='Maximum execution time in seconds (default: %(default)s).')
-    parser.add_argument('modulename', help='C extension module name.')
-    parser.add_argument('csources', nargs='+', help='C extension source files.')
+    subparser.add_argument('modulename', help='C extension module name.')
+    subparser.add_argument('csources', nargs='+', help='C extension source files.')
+    subparser.set_defaults(func=do_run)
+
+    # The corpus_print subparser.
+    subparser = subparsers.add_parser('corpus_print')
+    subparser.set_defaults(func=do_corpus_print)
+
+    # The print_corpus subparser.
+    subparser = subparsers.add_parser('corpus_clear')
+    subparser.set_defaults(func=do_corpus_clear)
 
     args = parser.parse_args()
 
     if args.debug:
-        do(args)
+        args.func(args)
     else:
         try:
-            do(args)
+            args.func(args)
         except BaseException as e:
             sys.exit('error: ' + str(e))

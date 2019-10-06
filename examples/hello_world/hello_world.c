@@ -35,8 +35,7 @@ static PyObject *m_tell(PyObject *module_p, PyObject *message_p)
             break;
         }
     } else {
-        Py_INCREF(Py_None);
-        res_p = Py_None;
+        res_p = NULL;
     }
 
     return (res_p);
