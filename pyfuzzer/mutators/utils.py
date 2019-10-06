@@ -1,3 +1,4 @@
+import sys
 import traceback
 
 
@@ -14,9 +15,13 @@ def print_function(func, args, limit=1024):
 
     fargs = ', '.join(sargs)
 
+    # Print and flush function name and arguments before calling the
+    # function since it may crash.
+    print(f'{func.__name__}({fargs})', end='', flush=True)
+
     try:
         res = func(*args)
-        print(f'{func.__name__}({fargs}) = {str(res)[:limit]}')
+        print(f' = {str(res)[:limit]}')
     except Exception:
-        print(f'{func.__name__}({fargs}) raises:')
+        print(' raises:')
         traceback.print_exc()

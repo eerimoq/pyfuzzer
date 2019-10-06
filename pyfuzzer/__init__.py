@@ -129,13 +129,33 @@ def do_run(args):
     run(args.maximum_execution_time)
 
 
+def array_to_bytes(string):
+    return bytes([
+        int(byte[2:], 16)
+        for byte in string.split(',')
+        if byte
+    ])
+
+
 def do_corpus_print(args):
-    for filename in os.listdir('corpus'):
-        command = ['./pyfuzzer_print_corpus', os.path.join('corpus', filename)]
-        subprocess.check_call(command)
+    if args.corpus is not None:
+        filename = 'pyfuzzer_corpus_print.bin'
+
+        with open(filename, 'wb') as fout:
+            fout.write(array_to_bytes(args.corpus))
+
+        paths = [filename]
+    else:
+        paths = [
+            os.path.join('corpus', filename)
+            for filename in os.listdir('corpus')
+        ]
+
+    for path in paths:
+        subprocess.check_call(['./pyfuzzer_print_corpus', path])
 
 
-def do_corpus_clear(args):
+def do_corpus_clear(_args):
     shutil.rmtree('corpus')
 
 
@@ -167,6 +187,11 @@ def main():
 
     # The corpus_print subparser.
     subparser = subparsers.add_parser('corpus_print')
+    subparser.add_argument(
+        'corpus',
+        nargs='?',
+        help=("Corpus data to print on the format '0x12,0x34,', just as printed "
+              "by libFuzzer."))
     subparser.set_defaults(func=do_corpus_print)
 
     # The print_corpus subparser.
