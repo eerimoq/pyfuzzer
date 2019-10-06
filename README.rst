@@ -182,20 +182,13 @@ argument.
 .. code-block:: python
 
    import traceback
-
+   from .pyfuzzer.mutators.utils import print_function
 
    def test_one_input(module, data):
        module.crc_32(data)
 
-
    def test_one_input_print(module, data):
-       print(f"Argument: {data}")
-
-       try:
-           res = module.crc_32(data)
-           print(f'Result:   {res}')
-       except Exception:
-           traceback.print_exc()
+        print_function(module.crc_32, [data])
 
 .. |buildstatus| image:: https://travis-ci.org/eerimoq/pyfuzzer.svg
 .. _buildstatus: https://travis-ci.org/eerimoq/pyfuzzer

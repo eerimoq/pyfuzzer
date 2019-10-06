@@ -131,7 +131,8 @@ def do_run(args):
 
 def do_corpus_print(args):
     for filename in os.listdir('corpus'):
-        run_command(['./pyfuzzer_print_corpus', os.path.join('corpus', filename)])
+        command = ['./pyfuzzer_print_corpus', os.path.join('corpus', filename)]
+        subprocess.check_call(command)
 
 
 def do_corpus_clear(args):
