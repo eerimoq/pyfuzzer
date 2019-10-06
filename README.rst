@@ -58,7 +58,7 @@ is usually good input when writing unit tests.
    tell(b'@\x01\x00') = 0
    tell(b'#@') = b'Hello!'
 
-See the `hello_world example`_ for full output.
+See the `hello_world`_ for full output.
 
 Hello world fatal error
 -----------------------
@@ -83,7 +83,7 @@ Print the function call that caused the crash.
    $ pyfuzzer print_crashes
    tell(b'..............................................') = None
 
-See the `hello_world_fatal_error example`_ for full output.
+See the `hello_world_fatal_error`_ for full output.
 
 Custom mutator
 --------------
@@ -100,7 +100,7 @@ generic one.
    $ pyfuzzer run -m hello_world_mutator.py hello_world hello_world.c
    ...
 
-See the `hello_world_custom_mutator example`_ for full output.
+See the `hello_world_custom_mutator`_ for full output.
 
 Mutators
 ========
@@ -130,8 +130,8 @@ argument.
 
 .. _libFuzzer: https://llvm.org/docs/LibFuzzer.html
 
-.. _hello_world example: https://github.com/eerimoq/pyfuzzer/tree/master/examples/hello_world
+.. _hello_world: https://github.com/eerimoq/pyfuzzer/tree/master/examples/hello_world
 
-.. _hello_world_fatal_error example: https://github.com/eerimoq/pyfuzzer/tree/master/examples/hello_world_fatal_error
+.. _hello_world_fatal_error: https://github.com/eerimoq/pyfuzzer/tree/master/examples/hello_world_fatal_error
 
-.. _hello_world_custom_mutator example: https://github.com/eerimoq/pyfuzzer/tree/master/examples/hello_world_custom_mutator
+.. _hello_world_custom_mutator: https://github.com/eerimoq/pyfuzzer/tree/master/examples/hello_world_custom_mutator
