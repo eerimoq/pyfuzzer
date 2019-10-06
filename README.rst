@@ -13,6 +13,10 @@ Ideas
 - Add support to fuzz test pure Python modules by generating C code
   from them using Cython.
 
+- Add a verbose option?
+
+- Print corpus after run?
+
 Installation
 ============
 
@@ -36,8 +40,8 @@ module ``hello_world``.
 
    $ cd examples/hello_world
    $ pyfuzzer run hello_world hello_world.c
-   $ clang -fprofile-instr-generate -fcoverage-mapping -g -fsanitize=fuzzer -fsanitize=signed-integer-overflow -fno-sanitize-recover=all -I/usr/local/include/python3.7m hello_world.c module.c /home/erik/workspace/pyfuzzer/pyfuzzer/pyfuzzer.c -Wl,-rpath /usr/local/lib -lpython3.7m -o pyfuzzer
-   $ clang -I/usr/local/include/python3.7m hello_world.c module.c /home/erik/workspace/pyfuzzer/pyfuzzer/pyfuzzer_print_corpus.c -Wl,-rpath /usr/local/lib -lpython3.7m -o pyfuzzer_print_corpus
+   clang -fprofile-instr-generate -fcoverage-mapping -g -fsanitize=fuzzer -fsanitize=signed-integer-overflow -fno-sanitize-recover=all -I/usr/local/include/python3.7m hello_world.c module.c /home/erik/workspace/pyfuzzer/pyfuzzer/pyfuzzer.c -Wl,-rpath /usr/local/lib -lpython3.7m -o pyfuzzer
+   clang -I/usr/local/include/python3.7m hello_world.c module.c /home/erik/workspace/pyfuzzer/pyfuzzer/pyfuzzer_print_corpus.c -Wl,-rpath /usr/local/lib -lpython3.7m -o pyfuzzer_print_corpus
    rm -f pyfuzzer.profraw
    ./pyfuzzer corpus -max_total_time=1 -max_len=4096
    INFO: Seed: 2903179615
