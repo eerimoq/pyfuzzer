@@ -4,6 +4,7 @@ import argparse
 import subprocess
 import sysconfig
 import shutil
+import glob
 
 from .version import __version__
 
@@ -137,30 +138,36 @@ def array_to_bytes(string):
     ])
 
 
-def do_corpus_print(args):
-    if args.corpus is not None:
-        filename = 'pyfuzzer_corpus_print.bin'
+def do_print_corpus(_args):
+    try:
+        filenames = os.listdir('corpus')
+    except:
+        return
 
-        with open(filename, 'wb') as fout:
-            fout.write(array_to_bytes(args.corpus))
-
-        paths = [filename]
-    else:
-        paths = [
-            os.path.join('corpus', filename)
-            for filename in os.listdir('corpus')
-        ]
+    paths = [
+        os.path.join('corpus', filename)
+        for filename in filenames
+    ]
 
     for path in paths:
         subprocess.check_call(['./pyfuzzer_print_corpus', path])
 
 
-def do_corpus_clear(_args):
-    shutil.rmtree('corpus')
+def do_print_crashes(_args):
+    for filename in glob.glob('crash-*'):
+        subprocess.check_call(['./pyfuzzer_print_corpus', filename])
+
+
+def do_clean(_args):
+    shutil.rmtree('corpus', ignore_errors=True)
+
+    for filename in glob.glob('crash-*'):
+        os.remove(filename)
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description='Use libFuzzer to fuzz test Python 3.6+ C extension modules.')
 
     parser.add_argument('-d', '--debug', action='store_true')
     parser.add_argument('--version',
@@ -174,7 +181,9 @@ def main():
     subparsers.required = True
 
     # The run subparser.
-    subparser = subparsers.add_parser('run')
+    subparser = subparsers.add_parser(
+        'run',
+        description='Build and run the fuzz tester.')
     subparser.add_argument('-m', '--mutator', help='Mutator module.')
     subparser.add_argument(
         '-t', '--maximum-execution-time',
@@ -185,18 +194,23 @@ def main():
     subparser.add_argument('csources', nargs='+', help='C extension source files.')
     subparser.set_defaults(func=do_run)
 
-    # The corpus_print subparser.
-    subparser = subparsers.add_parser('corpus_print')
-    subparser.add_argument(
-        'corpus',
-        nargs='?',
-        help=("Corpus data to print on the format '0x12,0x34,', just as printed "
-              "by libFuzzer."))
-    subparser.set_defaults(func=do_corpus_print)
-
     # The print_corpus subparser.
-    subparser = subparsers.add_parser('corpus_clear')
-    subparser.set_defaults(func=do_corpus_clear)
+    subparser = subparsers.add_parser(
+        'print_corpus',
+        description=('Print the corpus as Python functions with arguments and '
+                     'return value or exception.'))
+    subparser.set_defaults(func=do_print_corpus)
+
+    # The print_crashes subparser.
+    subparser = subparsers.add_parser('print_crashes',
+                                      description='Print all crashes.')
+    subparser.set_defaults(func=do_print_crashes)
+
+    # The clean subparser.
+    subparser = subparsers.add_parser(
+        'clean',
+        description='Remove the corpus and all crashes.')
+    subparser.set_defaults(func=do_clean)
 
     args = parser.parse_args()
 
