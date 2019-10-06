@@ -26,6 +26,9 @@ Installation
 Example Usage
 =============
 
+Default mutator
+---------------
+
 Use the default mutator ``pyfuzzer.mutators.random`` when testing the
 module ``hello_world``.
 
@@ -33,24 +36,32 @@ module ``hello_world``.
 
    $ cd examples/hello_world
    $ pyfuzzer run hello_world hello_world.c
-   clang -fprofile-instr-generate -fcoverage-mapping -g -fsanitize=fuzzer -fsanitize=signed-integer-overflow -fno-sanitize-recover=all -I/usr/include/python3.7m hello_world.c module.c /home/erik/workspace/pyfuzzer/pyfuzzer/pyfuzzer.c -Wl,-Bsymbolic-functions -Wl,-z,relro -lpython3.7m -o hello_world
-   rm -f hello_world.profraw
-   ./hello_world corpus -max_total_time=1 -max_len=4096
-   INFO: Seed: 747042709
-   INFO: Loaded 1 modules   (23 inline 8-bit counters): 23 [0x47446d, 0x474484),
-   INFO: Loaded 1 PC tables (23 PCs): 23 [0x461790,0x461900),
-   INFO:        4 files found in corpus
+   $ clang -fprofile-instr-generate -fcoverage-mapping -g -fsanitize=fuzzer -fsanitize=signed-integer-overflow -fno-sanitize-recover=all -I/usr/local/include/python3.7m hello_world.c module.c /home/erik/workspace/pyfuzzer/pyfuzzer/pyfuzzer.c -Wl,-rpath /usr/local/lib -lpython3.7m -o pyfuzzer
+   $ clang -I/usr/local/include/python3.7m hello_world.c module.c /home/erik/workspace/pyfuzzer/pyfuzzer/pyfuzzer_print_corpus.c -Wl,-rpath /usr/local/lib -lpython3.7m -o pyfuzzer_print_corpus
+   rm -f pyfuzzer.profraw
+   ./pyfuzzer corpus -max_total_time=1 -max_len=4096
+   INFO: Seed: 2903179615
+   INFO: Loaded 1 modules   (23 inline 8-bit counters): 23 [0x67945d, 0x679474),
+   INFO: Loaded 1 PC tables (23 PCs): 23 [0x465d30,0x465ea0),
+   INFO:        0 files found in corpus
    Importing module under test... done.
    Importing custom mutator... failed.
    ModuleNotFoundError: No module named 'mutator'
    Importing mutator 'pyfuzzer.mutators.random'... done.
    Finding function 'test_one_input' in mutator... done.
-   INFO: seed corpus: files: 4 min: 1b max: 4b total: 10b rss: 44Mb
-   #5	INITED cov: 11 ft: 12 corp: 4/10b lim: 4 exec/s: 0 rss: 44Mb
-   #784855	DONE   cov: 11 ft: 12 corp: 4/10b lim: 4096 exec/s: 392427 rss: 44Mb
-   Done 784855 runs in 2 second(s)
-   llvm-profdata merge -sparse hello_world.profraw -o hello_world.profdata
-   llvm-cov show hello_world -instr-profile=hello_world.profdata -ignore-filename-regex=/usr/include|pyfuzzer.c|module.c
+   INFO: A corpus is not provided, starting from an empty corpus
+   #2	INITED cov: 4 ft: 5 corp: 1/1b lim: 4 exec/s: 0 rss: 34Mb
+        NEW_FUNC[1/1]: 0x4554e0 in m_tell /home/erik/workspace/pyfuzzer/examples/hello_world/hello_world.c:10
+   #51	NEW    cov: 6 ft: 8 corp: 2/5b lim: 4 exec/s: 0 rss: 36Mb L: 4/4 MS: 4 ChangeBinInt-CopyPart-InsertByte-InsertByte-
+   #412	NEW    cov: 10 ft: 12 corp: 3/9b lim: 6 exec/s: 0 rss: 36Mb L: 4/4 MS: 1 ChangeBinInt-
+   #468	NEW    cov: 11 ft: 13 corp: 4/14b lim: 6 exec/s: 0 rss: 36Mb L: 5/5 MS: 1 InsertByte-
+   #502	NEW    cov: 12 ft: 14 corp: 5/20b lim: 6 exec/s: 0 rss: 36Mb L: 6/6 MS: 4 ShuffleBytes-ChangeByte-ChangeBinInt-CopyPart-
+   #763	NEW    cov: 13 ft: 15 corp: 6/28b lim: 8 exec/s: 0 rss: 36Mb L: 8/8 MS: 1 CrossOver-
+   #1466	REDUCE cov: 13 ft: 15 corp: 6/27b lim: 14 exec/s: 0 rss: 36Mb L: 7/7 MS: 3 ChangeBinInt-CopyPart-EraseBytes-
+   #63426	DONE   cov: 13 ft: 15 corp: 6/27b lim: 625 exec/s: 31713 rss: 36Mb
+   Done 63426 runs in 2 second(s)
+   llvm-profdata merge -sparse pyfuzzer.profraw -o pyfuzzer.profdata
+   llvm-cov show pyfuzzer -instr-profile=pyfuzzer.profdata -ignore-filename-regex=/usr/|pyfuzzer.c|module.c
        1|       |#include <Python.h>
        2|       |
        3|       |PyDoc_STRVAR(
@@ -60,57 +71,89 @@ module ``hello_world``.
        7|       |    "Arguments: (message:bytes)\n");
        8|       |
        9|       |static PyObject *m_tell(PyObject *module_p, PyObject *message_p)
-      10|   784k|{
-      11|   784k|    Py_ssize_t size;
-      12|   784k|    char* buf_p;
-      13|   784k|    int res;
-      14|   784k|    PyObject *res_p;
-      15|   784k|
-      16|   784k|    res = PyBytes_AsStringAndSize(message_p, &buf_p, &size);
-      17|   784k|
-      18|   784k|    if (res != -1) {
-      19|   784k|        switch (size) {
-      20|   784k|
-      21|   784k|        case 0:
-      22|  35.7k|            res_p = PyLong_FromLong(5);
-      23|  35.7k|            break;
-      24|   784k|
-      25|   784k|        case 1:
-      26|  81.8k|            res_p = PyBool_FromLong(1);
-      27|  81.8k|            break;
-      28|   784k|
-      29|   784k|        case 2:
-      30|  85.5k|            res_p = PyBytes_FromString("Hello!");
-      31|  85.5k|            break;
-      32|   784k|
-      33|   784k|        default:
-      34|   581k|            res_p = PyLong_FromLong(0);
-      35|   581k|            break;
-      36|      0|        }
-      37|      0|    } else {
-      38|      0|        Py_INCREF(Py_None);
-      39|      0|        res_p = Py_None;
-      40|      0|    }
-      41|   784k|
-      42|   784k|    return (res_p);
-      43|   784k|}
-      44|       |
-      45|       |static struct PyMethodDef methods[] = {
-      46|       |    { "tell", m_tell, METH_O, tell_doc},
-      47|       |    { NULL }
-      48|       |};
-      49|       |
-      50|       |static PyModuleDef module = {
-      51|       |    PyModuleDef_HEAD_INIT,
-      52|       |    .m_name = "hello_world",
-      53|       |    .m_size = -1,
-      54|       |    .m_methods = methods
-      55|       |};
-      56|       |
-      57|       |PyMODINIT_FUNC PyInit_hello_world(void)
-      58|      1|{
-      59|      1|    return (PyModule_Create(&module));
-      60|      1|}
+      10|  18.4k|{
+      11|  18.4k|    Py_ssize_t size;
+      12|  18.4k|    char* buf_p;
+      13|  18.4k|    int res;
+      14|  18.4k|    PyObject *res_p;
+      15|  18.4k|
+      16|  18.4k|    res = PyBytes_AsStringAndSize(message_p, &buf_p, &size);
+      17|  18.4k|
+      18|  18.4k|    if (res != -1) {
+      19|  15.5k|        switch (size) {
+      20|  15.5k|
+      21|  15.5k|        case 0:
+      22|  1.50k|            res_p = PyLong_FromLong(5);
+      23|  1.50k|            break;
+      24|  15.5k|
+      25|  15.5k|        case 1:
+      26|  1.55k|            res_p = PyBool_FromLong(1);
+      27|  1.55k|            break;
+      28|  15.5k|
+      29|  15.5k|        case 2:
+      30|  1.65k|            res_p = PyBytes_FromString("Hello!");
+      31|  1.65k|            break;
+      32|  15.5k|
+      33|  15.5k|        default:
+      34|  10.8k|            res_p = PyLong_FromLong(0);
+      35|  10.8k|            break;
+      36|  2.88k|        }
+      37|  2.88k|    } else {
+      38|  2.88k|        res_p = NULL;
+      39|  2.88k|    }
+      40|  18.4k|
+      41|  18.4k|    return (res_p);
+      42|  18.4k|}
+      43|       |
+      44|       |static struct PyMethodDef methods[] = {
+      45|       |    { "tell", m_tell, METH_O, tell_doc},
+      46|       |    { NULL }
+      47|       |};
+      48|       |
+      49|       |static PyModuleDef module = {
+      50|       |    PyModuleDef_HEAD_INIT,
+      51|       |    .m_name = "hello_world",
+      52|       |    .m_size = -1,
+      53|       |    .m_methods = methods
+      54|       |};
+      55|       |
+      56|       |PyMODINIT_FUNC PyInit_hello_world(void)
+      57|      1|{
+      58|      1|    return (PyModule_Create(&module));
+      59|      1|}
+
+Print the function calls that found new code paths. This information
+is usually good input when writing unit tests.
+
+.. code-block:: text
+
+   $ pyfuzzer corpus_print
+   ./pyfuzzer_print_corpus corpus/9ce9554501e0ceafdc80947723b2266c7d4465b1
+   Function:  tell
+   Arguments: [b"'"]
+   Result:    True
+   ./pyfuzzer_print_corpus corpus/eba41d971b38378309f43d49643edf0cfaab5f4d
+   Function:  tell
+   Arguments: [b"'\x03"]
+   Result:    b'Hello!'
+   ./pyfuzzer_print_corpus corpus/889343cd62dbff5263be0a245834550f8801df95
+   Function:  tell
+   Arguments: [b'']
+   Result:    5
+   ./pyfuzzer_print_corpus corpus/e29871be07980068a513c9743dba073b122796b4
+   Function:  tell
+   Arguments: [True]
+   Traceback (most recent call last):
+     File "/home/erik/workspace/pyfuzzer/pyfuzzer/mutators/random.py", line 94, in test_one_input_print
+       res = func(*args)
+   TypeError: expected bytes, bool found
+   ./pyfuzzer_print_corpus corpus/29a45f3baa3f6e1a904010761d9d82467ba0ee1e
+   Function:  tell
+   Arguments: [b'\x03\x00\x08']
+   Result:    0
+
+Custom mutator
+--------------
 
 Use the custom mutator ``hello_world_mutator`` when testing the module
 ``hello_world``.
@@ -138,8 +181,21 @@ argument.
 
 .. code-block:: python
 
+   import traceback
+
+
    def test_one_input(module, data):
        module.crc_32(data)
+
+
+   def test_one_input_print(module, data):
+       print(f"Argument: {data}")
+
+       try:
+           res = module.crc_32(data)
+           print(f'Result:   {res}')
+       except Exception:
+           traceback.print_exc()
 
 .. |buildstatus| image:: https://travis-ci.org/eerimoq/pyfuzzer.svg
 .. _buildstatus: https://travis-ci.org/eerimoq/pyfuzzer
