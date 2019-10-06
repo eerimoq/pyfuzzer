@@ -112,10 +112,11 @@ module ``hello_world``.
       59|      1|    return (PyModule_Create(&module));
       60|      1|}
 
-Use a custom mutator when testing the module hello_world.
+Use the custom mutator ``hello_world_mutator`` when testing the module
+``hello_world``.
 
-Testing with a custom mutator ``hello_world_mutator`` is often more
-efficient then using a generic one.
+Testing with a custom mutator is often more efficient than using a
+generic one.
 
 .. code-block:: text
 
