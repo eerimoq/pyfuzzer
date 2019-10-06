@@ -102,7 +102,7 @@ def run(name, maximum_execution_time):
         'show',
         name,
         f'-instr-profile={name}.profdata',
-        '-ignore-filename-regex=/usr/include|pyfuzzer.c|module.c'
+        '-ignore-filename-regex=/usr/|pyfuzzer.c|module.c'
     ])
 
 

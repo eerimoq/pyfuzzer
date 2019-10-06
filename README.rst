@@ -16,6 +16,8 @@ Ideas
 Installation
 ============
 
+`clang 8` or later is required.
+
 .. code-block:: text
 
    $ apt install clang
@@ -120,6 +122,24 @@ efficient then using a generic one.
    $ cd examples/hello_world_custom_mutator
    $ pyfuzzer -m hello_world_mutator.py hello_world hello_world.c
    ...
+
+Mutators
+========
+
+A Mutator uses data from `libFuzzer`_ to test a module. A mutator must
+implement the function ``test_one_input(module, data)``, where
+``module`` is the module under test and ``data`` is the data generated
+by `libFuzzer`_ (as a bytes object).
+
+A minimal mutator fuzz testing a CRC-32 algorithm could look like
+below. It simply calls ``crc_32()`` with ``data`` as its only
+argument.
+
+.. code-block:: python
+
+   def test_one_input(module, data):
+       module.crc_32(data)
+
 
 .. |buildstatus| image:: https://travis-ci.org/eerimoq/pyfuzzer.svg
 .. _buildstatus: https://travis-ci.org/eerimoq/pyfuzzer
