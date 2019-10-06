@@ -58,7 +58,7 @@ is usually good input when writing unit tests.
    tell(b'@\x01\x00') = 0
    tell(b'#@') = b'Hello!'
 
-See the `hello_world`_ for full output.
+See the `hello_world`_ for all files and full output.
 
 Hello world fatal error
 -----------------------
@@ -83,7 +83,7 @@ Print the function call that caused the crash.
    $ pyfuzzer print_crashes
    tell(b'..............................................') = None
 
-See the `hello_world_fatal_error`_ for full output.
+See the `hello_world_fatal_error`_ for all files and full output.
 
 Custom mutator
 --------------
@@ -100,7 +100,7 @@ generic one.
    $ pyfuzzer run -m hello_world_mutator.py hello_world hello_world.c
    ...
 
-See the `hello_world_custom_mutator`_ for full output.
+See the `hello_world_custom_mutator`_ for all files and full output.
 
 Mutators
 ========
