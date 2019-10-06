@@ -13,9 +13,7 @@ Ideas
 - Add support to fuzz test pure Python modules by generating C code
   using Cython.
 
-- Add a verbose option?
-
-- Print corpus after run?
+- Call random methods on classes.
 
 Installation
 ============
