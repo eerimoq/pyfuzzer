@@ -19,14 +19,14 @@ def generate_bool(data):
 
 
 def generate_string(data):
-    return str(data.read(data.read(1)[0]))
+    return str(data.read(data.read(1)[0]))[2:-1]
 
 
 def generate_bytes(data):
     return data.read(data.read(1)[0])
 
 
-def generate_none(data):
+def generate_none(_data):
     return None
 
 

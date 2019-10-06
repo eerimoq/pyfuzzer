@@ -2,7 +2,17 @@ import traceback
 
 
 def print_function(func, args):
-    fargs = ', '.join([str(arg) for arg in args])
+    sargs = []
+
+    for arg in args:
+        if isinstance(arg, str):
+            arg = f"'{arg}'"
+        else:
+            arg = str(arg)
+
+        sargs.append(arg)
+
+    fargs = ', '.join(sargs)
 
     try:
         res = func(*args)
