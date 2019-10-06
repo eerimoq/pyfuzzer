@@ -139,6 +139,8 @@ def array_to_bytes(string):
 
 
 def do_print_corpus(_args):
+    print('Corpus:')
+
     try:
         filenames = os.listdir('corpus')
     except:
@@ -154,6 +156,8 @@ def do_print_corpus(_args):
 
 
 def do_print_crashes(_args):
+    print('Crashes:')
+
     for filename in glob.glob('crash-*'):
         subprocess.check_call(['./pyfuzzer_print_corpus', filename])
 
