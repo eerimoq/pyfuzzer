@@ -38,7 +38,7 @@ module ``hello_world``.
 
    $ cd examples/hello_world
    $ pyfuzzer run hello_world hello_world.c
-   ...
+   <lots of libFuzzer output>
 
 Print the function calls that found new code paths. This information
 is usually good input when writing unit tests.
