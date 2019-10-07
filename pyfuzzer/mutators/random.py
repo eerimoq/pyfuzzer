@@ -59,13 +59,22 @@ def lookup_function(module, value):
     return FUNCS[value % NUMBER_OF_FUNCS]
 
 
+def lookup_class_methods(cls):
+    return [
+        m[1]
+        for m in inspect.getmembers(cls)
+        if m[0][0] != '_'
+    ]
+
+
 def lookup_class(module, value):
     global CLASSES
     global NUMBER_OF_CLASSES
 
     if CLASSES is None:
         CLASSES = [
-            m[1] for m in inspect.getmembers(module, inspect.isclass)
+            (cls, lookup_class_methods(cls))
+            for _, cls in inspect.getmembers(module, inspect.isclass)
         ]
         NUMBER_OF_CLASSES = len(CLASSES)
 
@@ -81,7 +90,7 @@ def generate_args(data):
     number_of_args = data.read(1)[0]
 
     for _ in range(number_of_args):
-        args.append(DATA_KINDS[data.read(1)[0]](data))
+        args.append(DATA_KINDS[data.read(1)[0] % len(DATA_KINDS)](data))
 
     return args
 
@@ -93,9 +102,13 @@ def test_one_function(module, data):
 
 
 def test_one_class(module, data):
-    cls = lookup_class(module, data.read(1)[0])
+    cls, methods = lookup_class(module, data.read(1)[0])
     args = generate_args(data)
-    cls(*args)
+    obj = cls(*args)
+
+    for _ in range(data.read(1)[0]):
+        method = methods[data.read(1)[0] % len(methods)]
+        method(obj, *generate_args(data))
 
 
 ATTRIBUTE_KIND = {
@@ -107,13 +120,19 @@ ATTRIBUTE_KIND = {
 def test_one_function_print(module, data):
     func = lookup_function(module, data.read(1)[0])
     args = generate_args(data)
-    print_callable(func, args)
+    print_callable(func, args, 4 * ' ')
 
 
 def test_one_class_print(module, data):
-    cls = lookup_class(module, data.read(1)[0])
+    cls, methods = lookup_class(module, data.read(1)[0])
     args = generate_args(data)
-    print_callable(cls, args)
+    obj = print_callable(cls, args, 4 * ' ')
+
+    for _ in range(data.read(1)[0]):
+        method = methods[data.read(1)[0] % len(methods)]
+        print_callable(method,
+                       [obj, *generate_args(data)],
+                       8 * ' ')
 
 
 ATTRIBUTE_KIND_PRINT = {
@@ -132,10 +151,10 @@ def test_one_input(module, data):
 
     data = BytesIO(data)
     kind = data.read(1)[0]
-    ATTRIBUTE_KIND[kind](module, data)
+    ATTRIBUTE_KIND[kind % len(ATTRIBUTE_KIND)](module, data)
 
 
 def test_one_input_print(module, data):
     data = BytesIO(data)
     kind = data.read(1)[0]
-    ATTRIBUTE_KIND_PRINT[kind](module, data)
+    ATTRIBUTE_KIND_PRINT[kind % len(ATTRIBUTE_KIND_PRINT)](module, data)

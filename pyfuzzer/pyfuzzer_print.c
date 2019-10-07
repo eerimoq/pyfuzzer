@@ -98,8 +98,11 @@ static void print_crash(PyObject *module_p,
                         const char *path_p)
 {
     PyObject *args_p;
+    PyObject *res_p;
     Py_ssize_t size;
     void *buf_p;
+
+    printf("%s:\n", path_p);
 
     buf_p = read_corpus(path_p, &size);
     args_p = PyTuple_Pack(2,
@@ -111,7 +114,13 @@ static void print_crash(PyObject *module_p,
         exit(1);
     }
 
-    PyObject_CallObject(test_one_input_print_p, args_p);
+    PyErr_Clear();
+    res_p = PyObject_CallObject(test_one_input_print_p, args_p);
+
+    if (res_p != NULL) {
+        Py_DECREF(res_p);
+    }
+
     free(buf_p);
 }
 

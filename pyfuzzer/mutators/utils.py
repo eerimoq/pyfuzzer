@@ -20,7 +20,7 @@ def format_args(args, limit):
     return ', '.join(sargs)
 
 
-def print_callable(obj, args, limit=1024):
+def print_callable(obj, args, indent, limit=1024):
     """Print given callable name and its arguments, call it and then print
     the returned value or raised exception.
 
@@ -30,11 +30,16 @@ def print_callable(obj, args, limit=1024):
 
     # Print and flush callable name and arguments before calling it
     # since it may crash.
-    print(f'{obj.__name__}({fargs})', end='', flush=True)
+    print(f'{indent}{obj.__name__}({fargs})', end='', flush=True)
 
     try:
         res = obj(*args)
         print(f' = {str(res)[:limit]}')
     except Exception:
+        res = None
         print(' raises:')
-        traceback.print_exc()
+
+        for line in traceback.format_exc().splitlines():
+            print(f'{indent}{line}')
+
+    return res
