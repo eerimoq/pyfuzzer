@@ -3,12 +3,12 @@ import inspect
 from io import BytesIO
 import struct
 
-from .utils import print_function
-from .utils import print_class
+from .utils import print_callable
 
 
 FUNCS = None
 NUMBER_OF_FUNCS = 0
+
 CLASSES = None
 NUMBER_OF_CLASSES = 0
 
@@ -107,13 +107,13 @@ ATTRIBUTE_KIND = {
 def test_one_function_print(module, data):
     func = lookup_function(module, data.read(1)[0])
     args = generate_args(data)
-    print_function(func, args)
+    print_callable(func, args)
 
 
 def test_one_class_print(module, data):
     cls = lookup_class(module, data.read(1)[0])
     args = generate_args(data)
-    print_class(cls, args)
+    print_callable(cls, args)
 
 
 ATTRIBUTE_KIND_PRINT = {

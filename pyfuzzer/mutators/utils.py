@@ -2,6 +2,11 @@ import traceback
 
 
 def format_args(args, limit):
+    """Returns a comma separated list of given arguemnts. Each argument is
+    at most ``limit`` characters.
+
+    """
+
     sargs = []
 
     for arg in args:
@@ -15,30 +20,20 @@ def format_args(args, limit):
     return ', '.join(sargs)
 
 
-def print_function(func, args, limit=1024):
+def print_callable(obj, args, limit=1024):
+    """Print given callable name and its arguments, call it and then print
+    the returned value or raised exception.
+
+    """
+
     fargs = format_args(args, limit)
 
-    # Print and flush function name and arguments before calling the
-    # function since it may crash.
-    print(f'{func.__name__}({fargs})', end='', flush=True)
+    # Print and flush callable name and arguments before calling it
+    # since it may crash.
+    print(f'{obj.__name__}({fargs})', end='', flush=True)
 
     try:
-        res = func(*args)
-        print(f' = {str(res)[:limit]}')
-    except Exception:
-        print(' raises:')
-        traceback.print_exc()
-
-
-def print_class(cls, args, limit=1024):
-    fargs = format_args(args, limit)
-
-    # Print and flush function name and arguments before calling the
-    # function since it may crash.
-    print(f'{cls.__name__}({fargs})', end='', flush=True)
-
-    try:
-        res = cls(*args)
+        res = obj(*args)
         print(f' = {str(res)[:limit]}')
     except Exception:
         print(' raises:')

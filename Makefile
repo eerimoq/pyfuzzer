@@ -12,6 +12,9 @@ test:
 	    PYTHONPATH=.:../.. \
 		python3 -m pyfuzzer run \
 		    -m hello_world_mutator.py hello_world hello_world.c
+	cd examples/hello_world_fatal_error && \
+	    ! PYTHONPATH=../.. \
+		python3 -m pyfuzzer run hello_world hello_world.c
 
 release-to-pypi:
 	python setup.py sdist

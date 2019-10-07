@@ -1,19 +1,16 @@
-from pyfuzzer.mutators.utils import print_function
+from pyfuzzer.mutators.utils import print_callable
+
+
+def mutate(data):
+    if data[0] == 0:
+        return None
+    else:
+        return data[1:]
 
 
 def test_one_input(module, data):
-    if data[0] == 0:
-        data = None
-    else:
-        data = data[1:]
-
-    module.tell(data)
+    module.tell(mutate(data))
 
 
 def test_one_input_print(module, data):
-    if data[0] == 0:
-        data = None
-    else:
-        data = data[1:]
-
-    print_function(module.tell, [data])
+    print_callable(module.tell, [mutate(data)])
