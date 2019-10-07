@@ -86,11 +86,11 @@ def build_print_corpus(csources):
     command += csources
     command += [
         'module.c',
-        os.path.join(SCRIPT_DIR, 'pyfuzzer_print_corpus.c')
+        os.path.join(SCRIPT_DIR, 'pyfuzzer_print.c')
     ]
     command += ldflags()
     command += [
-        '-o', 'pyfuzzer_print_corpus'
+        '-o', 'pyfuzzer_print'
     ]
 
     run_command(command)
@@ -146,20 +146,25 @@ def do_print_corpus(_args):
     except:
         return
 
-    paths = [
+    paths = '\n'.join([
         os.path.join('corpus', filename)
         for filename in filenames
-    ]
+    ])
 
-    for path in paths:
-        subprocess.check_call(['./pyfuzzer_print_corpus', path])
+    subprocess.run(['./pyfuzzer_print'], input=paths.encode('utf-8'), check=True)
 
 
 def do_print_crashes(_args):
     print('Crashes:')
 
     for filename in glob.glob('crash-*'):
-        subprocess.check_call(['./pyfuzzer_print_corpus', filename])
+        proc = subprocess.run(['./pyfuzzer_print'], input=filename.encode('utf-8'))
+        print()
+
+        try:
+            proc.check_returncode()
+        except Exception as e:
+            print(e)
 
 
 def do_clean(_args):
