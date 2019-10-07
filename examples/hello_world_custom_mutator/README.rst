@@ -6,11 +6,11 @@ Fuzzy-test the ``hello_world`` module using the custom mutator
 
 .. code-block:: text
 
-   $ pyfuzzer run -m hello_world_mutator.py hello_world hello_world.c
+   $ pyfuzzer run -l max_total_time=1 -m hello_world_mutator.py hello_world hello_world.c
    clang -fprofile-instr-generate -fcoverage-mapping -g -fsanitize=fuzzer -fsanitize=signed-integer-overflow -fno-sanitize-recover=all -I/usr/include/python3.7m hello_world.c module.c /home/erik/workspace/pyfuzzer/pyfuzzer/pyfuzzer.c -Wl,-Bsymbolic-functions -Wl,-z,relro -lpython3.7m -o pyfuzzer
    clang -I/usr/include/python3.7m hello_world.c module.c /home/erik/workspace/pyfuzzer/pyfuzzer/pyfuzzer_print_corpus.c -Wl,-Bsymbolic-functions -Wl,-z,relro -lpython3.7m -o pyfuzzer_print_corpus
    rm -f pyfuzzer.profraw
-   ./pyfuzzer corpus -max_total_time=1 -max_len=4096
+   ./pyfuzzer corpus -max_total_time=1
    INFO: Seed: 4068588707
    INFO: Loaded 1 modules   (23 inline 8-bit counters): 23 [0x47444d, 0x474464),
    INFO: Loaded 1 PC tables (23 PCs): 23 [0x461770,0x4618e0),

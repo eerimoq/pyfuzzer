@@ -96,15 +96,14 @@ def build_print_corpus(csources):
     run_command(command)
 
 
-def run(maximum_execution_time):
+def run(libfuzzer_arguments):
     run_command(['rm', '-f', 'pyfuzzer.profraw'])
     mkdir_p('corpus')
     command = [
         './pyfuzzer',
-        'corpus',
-        f'-max_total_time={maximum_execution_time}',
-        '-max_len=4096'
+        'corpus'
     ]
+    command += [f'-{a}' for a in libfuzzer_arguments]
     env = os.environ.copy()
     env['LLVM_PROFILE_FILE'] = 'pyfuzzer.profraw'
     run_command(command, env=env)
@@ -127,7 +126,7 @@ def do_run(args):
     generate(args.modulename, args.mutator)
     build(args.csources)
     build_print_corpus(args.csources)
-    run(args.maximum_execution_time)
+    run(args.libfuzzer_argument)
 
 
 def array_to_bytes(string):
@@ -195,10 +194,10 @@ def main():
         description='Build and run the fuzz tester.')
     subparser.add_argument('-m', '--mutator', help='Mutator module.')
     subparser.add_argument(
-        '-t', '--maximum-execution-time',
-        type=int,
-        default=1,
-        help='Maximum execution time in seconds (default: %(default)s).')
+        '-l', '--libfuzzer-argument',
+        action='append',
+        default=[],
+        help="Add a libFuzzer command line argument without its leading '-'.")
     subparser.add_argument('modulename', help='C extension module name.')
     subparser.add_argument('csources', nargs='+', help='C extension source files.')
     subparser.set_defaults(func=do_run)

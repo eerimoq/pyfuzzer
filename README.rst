@@ -27,7 +27,7 @@ module ``hello_world``.
 .. code-block:: text
 
    $ cd examples/hello_world
-   $ pyfuzzer run hello_world hello_world.c
+   $ pyfuzzer run -l max_total_time=1 hello_world hello_world.c
    <lots of libFuzzer output>
 
 Print the function calls that found new code paths. This information
@@ -87,7 +87,7 @@ generic one.
 .. code-block:: text
 
    $ cd examples/hello_world_custom_mutator
-   $ pyfuzzer run -m hello_world_mutator.py hello_world hello_world.c
+   $ pyfuzzer run -l max_total_time=1 -m hello_world_mutator.py hello_world hello_world.c
    ...
 
 See the `hello_world_custom_mutator`_ for all files and full output.

@@ -6,9 +6,13 @@ python:
 script:
   - (cd examples/hello_world &&
          PYTHONPATH=../.. python -m pyfuzzer clean &&
-         PYTHONPATH=../.. python -m pyfuzzer run hello_world hello_world.c &&
+         PYTHONPATH=../.. python -m pyfuzzer run
+             -l max_total_time=1 hello_world hello_world.c &&
          PYTHONPATH=../.. python -m pyfuzzer print_corpus &&
          PYTHONPATH=../.. python -m pyfuzzer print_crashes)
   - (cd examples/hello_world_custom_mutator &&
          PYTHONPATH=.:../..
-             python -m pyfuzzer run -m hello_world_mutator.py hello_world hello_world.c)
+             python -m pyfuzzer run
+                 -l max_total_time=1
+                 -m hello_world_mutator.py
+                 hello_world hello_world.c)

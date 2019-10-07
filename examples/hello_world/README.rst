@@ -6,11 +6,11 @@ module ``hello_world``.
 
 .. code-block:: text
 
-   $ pyfuzzer run hello_world hello_world.c
+   $ pyfuzzer run -l max_total_time=1 hello_world hello_world.c
    clang -fprofile-instr-generate -fcoverage-mapping -g -fsanitize=fuzzer -fsanitize=signed-integer-overflow -fno-sanitize-recover=all -I/usr/local/include/python3.7m hello_world.c module.c /home/erik/workspace/pyfuzzer/pyfuzzer/pyfuzzer.c -Wl,-rpath /usr/local/lib -lpython3.7m -o pyfuzzer
    clang -I/usr/local/include/python3.7m hello_world.c module.c /home/erik/workspace/pyfuzzer/pyfuzzer/pyfuzzer_print_corpus.c -Wl,-rpath /usr/local/lib -lpython3.7m -o pyfuzzer_print_corpus
    rm -f pyfuzzer.profraw
-   ./pyfuzzer corpus -max_total_time=1 -max_len=4096
+   ./pyfuzzer corpus -max_total_time=1
    INFO: Seed: 2903179615
    INFO: Loaded 1 modules   (23 inline 8-bit counters): 23 [0x67945d, 0x679474),
    INFO: Loaded 1 PC tables (23 PCs): 23 [0x465d30,0x465ea0),
