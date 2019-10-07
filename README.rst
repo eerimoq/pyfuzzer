@@ -30,8 +30,8 @@ module ``hello_world``.
    $ pyfuzzer run hello_world hello_world.c
    <lots of libFuzzer output>
 
-Now print the function calls that found new code paths. This
-information is usually good input when writing unit tests.
+Print the function calls that found new code paths. This information
+is usually useful when writing unit tests.
 
 .. code-block:: text
 
@@ -51,8 +51,9 @@ See the `hello_world`_ for all files and full output.
 Hello world fatal error
 -----------------------
 
-Similar to the previous example, but triggers a fatal error in one
-branch in the code.
+Similar to the previous example, but triggers a fatal error when
+``tell()`` is called with a bytes object longer than 2 bytes as its
+first argument.
 
 .. code-block:: text
 
@@ -64,7 +65,8 @@ branch in the code.
    Current thread 0x00007f7ca99c2780 (most recent call first):
    ...
 
-Now print the function call that caused the crash.
+Print the function call that caused the crash. Just as expected, the
+first argument is clearly longer than 2 bytes.
 
 .. code-block:: text
 
