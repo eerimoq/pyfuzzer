@@ -73,7 +73,13 @@ def build(csources, cflags):
         command += format_cflags(cflags)
     else:
         command += [
-            '-fsanitize=signed-integer-overflow',
+            '-fsanitize=undefined',
+            '-fsanitize=integer',
+            '-fsanitize=alignment',
+            '-fsanitize=bool',
+            '-fsanitize=builtin',
+            '-fsanitize=bounds',
+            '-fsanitize=enum',
             '-fno-sanitize-recover=all'
         ]
 
@@ -188,6 +194,9 @@ def do_clean(_args):
         os.remove(filename)
 
     for filename in glob.glob('oom-*'):
+        os.remove(filename)
+
+    for filename in glob.glob('slow-unit-*'):
         os.remove(filename)
 
 
