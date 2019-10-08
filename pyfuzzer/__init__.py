@@ -74,7 +74,7 @@ def build(csources, cflags):
     else:
         command += [
             '-fsanitize=undefined',
-            '-fsanitize=integer',
+            '-fsanitize=signed-integer-overflow',
             '-fsanitize=alignment',
             '-fsanitize=bool',
             '-fsanitize=builtin',

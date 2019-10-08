@@ -41,6 +41,10 @@ def generate_dict(data):
     return {value: value for value in generate_args(data)}
 
 
+def generate_bytearray(data):
+    return bytearray(data.read(1)[0])
+
+
 DATA_KINDS = {
     0: generate_integer,
     1: generate_bool,
@@ -48,7 +52,8 @@ DATA_KINDS = {
     3: generate_bytes,
     4: generate_none,
     5: generate_list,
-    6: generate_dict
+    6: generate_dict,
+    7: generate_bytearray
 }
 
 
