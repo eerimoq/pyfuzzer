@@ -56,16 +56,27 @@ def generate(module_name, mutator):
         shutil.copyfile(mutator, 'mutator.py')
 
 
-def build(csources):
+def format_cflags(cflags):
+    return [f'-{cflag}' for cflag in cflags if cflag]
+
+
+def build(csources, cflags):
     command = ['clang']
     command += [
         '-fprofile-instr-generate',
         '-fcoverage-mapping',
         '-g',
-        '-fsanitize=fuzzer',
-        '-fsanitize=signed-integer-overflow',
-        '-fno-sanitize-recover=all'
+        '-fsanitize=fuzzer'
     ]
+
+    if cflags:
+        command += format_cflags(cflags)
+    else:
+        command += [
+            '-fsanitize=signed-integer-overflow',
+            '-fno-sanitize-recover=all'
+        ]
+
     command += includes()
     command += csources
     command += [
@@ -80,8 +91,9 @@ def build(csources):
     run_command(command)
 
 
-def build_print_corpus(csources):
+def build_print(csources, cflags):
     command = ['clang']
+    command += format_cflags(cflags)
     command += includes()
     command += csources
     command += [
@@ -101,7 +113,8 @@ def run(libfuzzer_arguments):
     mkdir_p('corpus')
     command = [
         './pyfuzzer',
-        'corpus'
+        'corpus',
+        '-print_final_stats=1'
     ]
     command += [f'-{a}' for a in libfuzzer_arguments]
     env = os.environ.copy()
@@ -124,8 +137,8 @@ def run(libfuzzer_arguments):
 
 def do_run(args):
     generate(args.modulename, args.mutator)
-    build(args.csources)
-    build_print_corpus(args.csources)
+    build(args.csources, args.cflag)
+    build_print(args.csources, args.cflag)
     run(args.libfuzzer_argument)
 
 
@@ -137,26 +150,28 @@ def array_to_bytes(string):
     ])
 
 
-def do_print_corpus(_args):
+def do_print_corpus(args):
     print('Corpus:')
 
-    try:
-        filenames = os.listdir('corpus')
-    except:
-        return
+    if args.units:
+        filenames = args.units
+    else:
+        filenames = glob.glob('corpus/*')
 
-    paths = '\n'.join([
-        os.path.join('corpus', filename)
-        for filename in filenames
-    ])
+    paths = '\n'.join(filenames)
 
     subprocess.run(['./pyfuzzer_print'], input=paths.encode('utf-8'), check=True)
 
 
-def do_print_crashes(_args):
+def do_print_crashes(args):
     print('Crashes:')
 
-    for filename in glob.glob('crash-*'):
+    if args.units:
+        filenames = args.units
+    else:
+        filenames = glob.glob('crash-*')
+
+    for filename in filenames:
         proc = subprocess.run(['./pyfuzzer_print'], input=filename.encode('utf-8'))
         print()
 
@@ -170,6 +185,9 @@ def do_clean(_args):
     shutil.rmtree('corpus', ignore_errors=True)
 
     for filename in glob.glob('crash-*'):
+        os.remove(filename)
+
+    for filename in glob.glob('oom-*'):
         os.remove(filename)
 
 
@@ -198,6 +216,12 @@ def main():
         action='append',
         default=[],
         help="Add a libFuzzer command line argument without its leading '-'.")
+    subparser.add_argument(
+        '-c', '--cflag',
+        action='append',
+        default=[],
+        help=("Add a C extension compilation flag without its leading '-'. If "
+              "given, all default sanitizers are removed."))
     subparser.add_argument('modulename', help='C extension module name.')
     subparser.add_argument('csources', nargs='+', help='C extension source files.')
     subparser.set_defaults(func=do_run)
@@ -205,19 +229,25 @@ def main():
     # The print_corpus subparser.
     subparser = subparsers.add_parser(
         'print_corpus',
-        description=('Print the corpus as Python functions with arguments and '
+        description=('Print corpus units as Python functions with arguments and '
                      'return value or exception.'))
+    subparser.add_argument('units',
+                           nargs='*',
+                           help='Units to print, or whole corpus if none given.')
     subparser.set_defaults(func=do_print_corpus)
 
     # The print_crashes subparser.
     subparser = subparsers.add_parser('print_crashes',
                                       description='Print all crashes.')
+    subparser.add_argument('units',
+                           nargs='*',
+                           help='Crashes to print, or all if none given.')
     subparser.set_defaults(func=do_print_crashes)
 
     # The clean subparser.
     subparser = subparsers.add_parser(
         'clean',
-        description='Remove the corpus and all crashes.')
+        description='Remove the corpus and all crashes to start over.')
     subparser.set_defaults(func=do_clean)
 
     args = parser.parse_args()

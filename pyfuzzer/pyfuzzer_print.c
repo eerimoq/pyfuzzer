@@ -37,16 +37,16 @@ static void init(PyObject **module_pp,
     }
 }
 
-static void *read_corpus(const char *corpus_path_p, Py_ssize_t *size_p)
+static void *read_unit(const char *unit_path_p, Py_ssize_t *size_p)
 {
     void *buf_p;
     FILE *fin_p;
     ssize_t res;
 
-    fin_p = fopen(corpus_path_p, "rb");
+    fin_p = fopen(unit_path_p, "rb");
 
     if (fin_p == NULL) {
-        fprintf(stderr, "Failed to open '%s'.\n", corpus_path_p);
+        fprintf(stderr, "Failed to open '%s'.\n", unit_path_p);
         exit(1);
     }
 
@@ -93,9 +93,9 @@ static void *read_corpus(const char *corpus_path_p, Py_ssize_t *size_p)
     return (buf_p);
 }
 
-static void print_crash(PyObject *module_p,
-                        PyObject *test_one_input_print_p,
-                        const char *path_p)
+static void print_unit(PyObject *module_p,
+                       PyObject *test_one_input_print_p,
+                       const char *path_p)
 {
     PyObject *args_p;
     PyObject *res_p;
@@ -104,7 +104,7 @@ static void print_crash(PyObject *module_p,
 
     printf("%s:\n", path_p);
 
-    buf_p = read_corpus(path_p, &size);
+    buf_p = read_unit(path_p, &size);
     args_p = PyTuple_Pack(2,
                           module_p,
                           PyBytes_FromStringAndSize((const char *)buf_p, size));
@@ -187,7 +187,7 @@ int main(int argc, const char *argv[])
             break;
         }
 
-        print_crash(module_p, test_one_input_print_p, strip(path_p, NULL));
+        print_unit(module_p, test_one_input_print_p, strip(path_p, NULL));
     }
 
     return (0);

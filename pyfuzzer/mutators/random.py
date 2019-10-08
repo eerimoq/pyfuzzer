@@ -33,12 +33,22 @@ def generate_none(_data):
     return None
 
 
+def generate_list(data):
+    return generate_args(data)
+
+
+def generate_dict(data):
+    return {value: value for value in generate_args(data)}
+
+
 DATA_KINDS = {
     0: generate_integer,
     1: generate_bool,
     2: generate_string,
     3: generate_bytes,
-    4: generate_none
+    4: generate_none,
+    5: generate_list,
+    6: generate_dict
 }
 
 
@@ -89,8 +99,11 @@ def generate_args(data):
     args = []
     number_of_args = data.read(1)[0]
 
-    for _ in range(number_of_args):
-        args.append(DATA_KINDS[data.read(1)[0] % len(DATA_KINDS)](data))
+    try:
+        for _ in range(number_of_args):
+            args.append(DATA_KINDS[data.read(1)[0] % len(DATA_KINDS)](data))
+    except Exception:
+        pass
 
     return args
 
@@ -119,6 +132,7 @@ ATTRIBUTE_KIND = {
 
 def test_one_function_print(module, data):
     func = lookup_function(module, data.read(1)[0])
+    print('test_one_function_print')
     args = generate_args(data)
     print_callable(func, args, 4 * ' ')
 
@@ -127,6 +141,9 @@ def test_one_class_print(module, data):
     cls, methods = lookup_class(module, data.read(1)[0])
     args = generate_args(data)
     obj = print_callable(cls, args, 4 * ' ')
+
+    if obj is None:
+        return
 
     for _ in range(data.read(1)[0]):
         method = methods[data.read(1)[0] % len(methods)]
