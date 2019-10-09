@@ -66,8 +66,6 @@ def get_signature(callable):
     try:
         return inspect.signature(callable)
     except Exception as e:
-        print(e)
-
         return None
 
 

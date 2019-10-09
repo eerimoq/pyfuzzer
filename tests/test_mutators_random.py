@@ -15,7 +15,7 @@ class MutatorsRandomTest(unittest.TestCase):
     def test_test_one_input(self):
         datas = [
             # add(1, 2) -> 3
-            (b'\x00\x00\x02'
+            (b'\x00\x00\x01\x02'
              + b'\x00' + struct.pack('>q', 1)
              + b'\x00' + struct.pack('>q', 2), 3),
             # add(1, 2) -> 3 using signature.
@@ -35,7 +35,7 @@ class MutatorsRandomTest(unittest.TestCase):
 
     def test_test_one_input_print(self):
         datas = [
-            (b'\x00\x00\x02'
+            (b'\x00\x00\x01\x02'
              + b'\x00' + struct.pack('>q', 1)
              + b'\x00' + struct.pack('>q', 2)),
             b'\x00\x01\x00',
