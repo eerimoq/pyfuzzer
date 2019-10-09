@@ -3,8 +3,11 @@ language: python
 python:
   - "3.7"
 
+install:
+  - pip install coveralls
+
 script:
-  - python setup.py test
+  - coverage run --source=pyfuzzer setup.py test
   - (cd examples/hello_world &&
          PYTHONPATH=../.. python -m pyfuzzer clean &&
          PYTHONPATH=../.. python -m pyfuzzer run
@@ -17,3 +20,6 @@ script:
                  -l max_total_time=1
                  -m hello_world_mutator.py
                  hello_world hello_world.c)
+
+after_success:
+  - coveralls
