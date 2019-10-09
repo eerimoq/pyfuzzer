@@ -56,8 +56,8 @@ static void init(PyObject **module_pp,
         printf("failed.\n");
         PyErr_Print();
 
-        printf("Importing mutator 'pyfuzzer.mutators.random'... ");
-        mutator_p = PyImport_ImportModule("pyfuzzer.mutators.random");
+        printf("Importing mutator 'pyfuzzer.mutators.generic'... ");
+        mutator_p = PyImport_ImportModule("pyfuzzer.mutators.generic");
 
         if (mutator_p != NULL) {
             printf("done.\n");

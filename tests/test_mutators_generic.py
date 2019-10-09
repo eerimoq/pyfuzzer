@@ -4,13 +4,13 @@ from unittest.mock import patch
 import struct
 from io import StringIO
 
-from pyfuzzer.mutators.random import test_one_input
-from pyfuzzer.mutators.random import test_one_input_print
+from pyfuzzer.mutators.generic import test_one_input
+from pyfuzzer.mutators.generic import test_one_input_print
 
 from . import c_extension
 
 
-class MutatorsRandomTest(unittest.TestCase):
+class MutatorsGenericTest(unittest.TestCase):
 
     def test_test_one_input(self):
         datas = [

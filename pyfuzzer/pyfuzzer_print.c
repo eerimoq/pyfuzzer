@@ -46,7 +46,7 @@ static void init(PyObject **module_pp,
     mutator_p = PyImport_ImportModule("mutator");
 
     if (mutator_p == NULL) {
-        mutator_p = PyImport_ImportModule("pyfuzzer.mutators.random");
+        mutator_p = PyImport_ImportModule("pyfuzzer.mutators.generic");
 
         if (mutator_p == NULL) {
             PyErr_Print();

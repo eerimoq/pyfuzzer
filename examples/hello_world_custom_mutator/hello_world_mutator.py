@@ -1,4 +1,4 @@
-from pyfuzzer.mutators.utils import print_callable
+from pyfuzzer.mutators.generic import print_callable
 
 
 def mutate(data):
