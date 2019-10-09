@@ -2,7 +2,7 @@ import sys
 import inspect
 from io import BytesIO
 import struct
-import inspect
+import traceback
 
 from .utils import print_callable
 
@@ -12,13 +12,6 @@ NUMBER_OF_FUNCS = 0
 
 CLASSES = None
 NUMBER_OF_CLASSES = 0
-
-
-def signature(callable):
-    try:
-        return inspect.signature(callable)
-    except Exception:
-        return None
 
 
 def generate_integer(data):
@@ -65,9 +58,17 @@ DATA_KINDS = {
 }
 
 
-DATA_KINDS_BY_ANNOTATION = {
-    int: generate_integer
-}
+def get_signature(callable):
+    """Get the signature for given callable.
+
+    """
+
+    try:
+        return inspect.signature(callable)
+    except Exception as e:
+        print(e)
+
+        return None
 
 
 def is_function(member):
@@ -80,7 +81,7 @@ def lookup_function(module, value):
 
     if FUNCS is None:
         FUNCS = [
-            (m[1], signature(m[1]))
+            (m[1], get_signature(m[1]))
             for m in inspect.getmembers(module, is_function)
         ]
         NUMBER_OF_FUNCS = len(FUNCS)
@@ -94,7 +95,7 @@ def lookup_function(module, value):
 
 def lookup_class_methods(cls):
     return [
-        (m[1], signature(m[1]))
+        (m[1], get_signature(m[1]))
         for m in inspect.getmembers(cls)
         if m[0][0] != '_'
     ]
@@ -106,7 +107,7 @@ def lookup_class(module, value):
 
     if CLASSES is None:
         CLASSES = [
-            (cls, signature(cls), lookup_class_methods(cls))
+            (cls, get_signature(cls), lookup_class_methods(cls))
             for _, cls in inspect.getmembers(module, inspect.isclass)
         ]
         NUMBER_OF_CLASSES = len(CLASSES)
@@ -124,24 +125,26 @@ def generate_args(signature, data):
 
     try:
         if signature is None:
-                for _ in range(number_of_args):
-                    args.append(DATA_KINDS[data.read(1)[0] % len(DATA_KINDS)](data))
+            for _ in range(number_of_args):
+                args.append(DATA_KINDS[data.read(1)[0] % len(DATA_KINDS)](data))
         else:
             if number_of_args == 0:
                 for parameter in signature.parameters.values():
                     if parameter.kind == inspect.Parameter.VAR_POSITIONAL:
                         args += generate_args(None, data)
                     else:
-                        if parameter.annotation in DATA_KINDS_BY_ANNOTATION:
-                            func = DATA_KINDS_BY_ANNOTATION[parameter.annotation]
+                        if parameter.annotation == int:
+                            func = generate_integer
                         else:
                             func = DATA_KINDS[data.read(1)[0] % len(DATA_KINDS)]
 
                         args.append(func(data))
             else:
+                number_of_args = data.read(1)[0]
+
                 for _ in range(number_of_args):
                     args.append(DATA_KINDS[data.read(1)[0] % len(DATA_KINDS)](data))
-    except Exception:
+    except (IndexError, TypeError, struct.error):
         pass
 
     return args
