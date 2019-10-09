@@ -2,9 +2,16 @@ import sys
 import inspect
 from io import BytesIO
 import struct
-import traceback
 
 from .utils import print_callable
+from .utils import generate_integer
+from .utils import generate_bool
+from .utils import generate_bytes
+from .utils import generate_bytearray
+from .utils import generate_string
+from .utils import generate_none
+from .utils import lookup_functions
+from .utils import lookup_classes
 
 
 FUNCS = None
@@ -14,36 +21,12 @@ CLASSES = None
 NUMBER_OF_CLASSES = 0
 
 
-def generate_integer(data):
-    return struct.unpack('>q', data.read(8))[0]
-
-
-def generate_bool(data):
-    return bool(data.read(1)[0])
-
-
-def generate_string(data):
-    return str(data.read(data.read(1)[0]))[2:-1]
-
-
-def generate_bytes(data):
-    return data.read(data.read(1)[0])
-
-
-def generate_none(_data):
-    return None
-
-
 def generate_list(data):
     return generate_args(None, data)
 
 
 def generate_dict(data):
     return {value: value for value in generate_args(None, data)}
-
-
-def generate_bytearray(data):
-    return bytearray(data.read(1)[0])
 
 
 DATA_KINDS = {
@@ -58,30 +41,12 @@ DATA_KINDS = {
 }
 
 
-def get_signature(callable):
-    """Get the signature for given callable.
-
-    """
-
-    try:
-        return inspect.signature(callable)
-    except Exception as e:
-        return None
-
-
-def is_function(member):
-    return inspect.isbuiltin(member) or inspect.isfunction(member)
-
-
 def lookup_function(module, value):
     global FUNCS
     global NUMBER_OF_FUNCS
 
     if FUNCS is None:
-        FUNCS = [
-            (m[1], get_signature(m[1]))
-            for m in inspect.getmembers(module, is_function)
-        ]
+        FUNCS = lookup_functions(module)
         NUMBER_OF_FUNCS = len(FUNCS)
 
         if NUMBER_OF_FUNCS > 256:
@@ -91,23 +56,12 @@ def lookup_function(module, value):
     return FUNCS[value % NUMBER_OF_FUNCS]
 
 
-def lookup_class_methods(cls):
-    return [
-        (m[1], get_signature(m[1]))
-        for m in inspect.getmembers(cls)
-        if m[0][0] != '_'
-    ]
-
-
 def lookup_class(module, value):
     global CLASSES
     global NUMBER_OF_CLASSES
 
     if CLASSES is None:
-        CLASSES = [
-            (cls, get_signature(cls), lookup_class_methods(cls))
-            for _, cls in inspect.getmembers(module, inspect.isclass)
-        ]
+        CLASSES = lookup_classes(module)
         NUMBER_OF_CLASSES = len(CLASSES)
 
         if NUMBER_OF_CLASSES > 256:
