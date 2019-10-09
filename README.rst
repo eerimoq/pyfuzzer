@@ -37,17 +37,22 @@ is usually useful when writing unit tests.
 .. code-block:: text
 
    $ pyfuzzer print_corpus
-   tell(b'') = 5
-   tell(b'@') = True
-   tell(None) raises:
-   Traceback (most recent call last):
-     File "/home/erik/workspace/pyfuzzer/pyfuzzer/mutators/utils.py", line 18, in print_function
-       res = func(*args)
-   TypeError: expected bytes, NoneType found
-   tell(b'@\x01\x00') = 0
-   tell(b'#@') = b'Hello!'
+   corpus/25409981b15b978c9fb5a5a2f4dab0c4b04e295f:
+       tell(b'') = 5
+   corpus/a8a4e6c9abfd3c6cba171579190702ddc1317df0:
+       tell(b'\xfd#') = b'Hello!'
+   corpus/80f87702ef9fbe4baf17095c79ff928b9fa1ea14:
+       tell(b'\x00') = True
+   corpus/be3d1b7df189727b2cecd6526aa8f24abbf6df10:
+       tell(b'\x00\xfd\x00') = 0
+   corpus/defd8787d638f271cd83362eafe7fdeed9fa4a8f:
+       tell(None) raises:
+       Traceback (most recent call last):
+         File "/home/erik/workspace/pyfuzzer/pyfuzzer/mutators/utils.py", line 35, in print_callable
+           res = obj(*args)
+       TypeError: expected bytes, NoneType found
 
-See the `hello_world`_ for all files and full output.
+See the `hello_world`_ for all files.
 
 Hello world fatal error
 -----------------------
@@ -72,9 +77,10 @@ first argument is clearly longer than 2 bytes.
 .. code-block:: text
 
    $ pyfuzzer print_crashes
-   tell(b'..............................................') = None
+   crash-1013ed88cd71fd14407b2bdbc17b95d7bc317c21:
+       tell(b'\n\xbf+') = None
 
-See the `hello_world_fatal_error`_ for all files and full output.
+See the `hello_world_fatal_error`_ for all files.
 
 Custom mutator
 --------------
@@ -91,7 +97,7 @@ generic one.
    $ pyfuzzer run -l max_total_time=1 -m hello_world_mutator.py hello_world hello_world.c
    ...
 
-See the `hello_world_custom_mutator`_ for all files and full output.
+See the `hello_world_custom_mutator`_ for all files.
 
 Mutators
 ========

@@ -152,8 +152,6 @@ def do_run(args):
 
 
 def do_print_corpus(args):
-    print('Corpus:')
-
     if args.units:
         filenames = args.units
     else:
@@ -165,8 +163,6 @@ def do_print_corpus(args):
 
 
 def do_print_crashes(args):
-    print('Crashes:')
-
     if args.units:
         filenames = args.units
     else:

@@ -13,4 +13,4 @@ def test_one_input(module, data):
 
 
 def test_one_input_print(module, data):
-    print_callable(module.tell, [mutate(data)])
+    print_callable(module.tell, [mutate(data)], 4 * ' ')
