@@ -1,4 +1,5 @@
 |buildstatus|_
+|coverage|_
 
 About
 =====
@@ -132,6 +133,9 @@ Ideas
 
 .. |buildstatus| image:: https://travis-ci.org/eerimoq/pyfuzzer.svg
 .. _buildstatus: https://travis-ci.org/eerimoq/pyfuzzer
+
+.. |coverage| image:: https://coveralls.io/repos/github/eerimoq/pyfuzzer/badge.svg?branch=master
+.. _coverage: https://coveralls.io/github/eerimoq/pyfuzzer
 
 .. _libFuzzer: https://llvm.org/docs/LibFuzzer.html
 
