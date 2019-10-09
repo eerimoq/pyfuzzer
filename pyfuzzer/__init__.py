@@ -87,6 +87,7 @@ def build(csources, cflags):
     command += csources
     command += [
         'module.c',
+        os.path.join(SCRIPT_DIR, 'pyfuzzer_common.c'),
         os.path.join(SCRIPT_DIR, 'pyfuzzer.c')
     ]
     command += ldflags()
@@ -104,6 +105,7 @@ def build_print(csources, cflags):
     command += csources
     command += [
         'module.c',
+        os.path.join(SCRIPT_DIR, 'pyfuzzer_common.c'),
         os.path.join(SCRIPT_DIR, 'pyfuzzer_print.c')
     ]
     command += ldflags()

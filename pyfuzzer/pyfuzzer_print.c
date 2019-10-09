@@ -25,43 +25,7 @@
  */
 
 #include <stdbool.h>
-#include <Python.h>
-
-extern PyObject *pyfuzzer_module_init(void);
-
-static void init(PyObject **module_pp,
-                 PyObject **test_one_input_print_pp)
-{
-    PyObject *mutator_p;
-
-    Py_Initialize();
-
-    *module_pp = pyfuzzer_module_init();
-
-    if (*module_pp == NULL) {
-        PyErr_Print();
-        exit(1);
-    }
-
-    mutator_p = PyImport_ImportModule("mutator");
-
-    if (mutator_p == NULL) {
-        mutator_p = PyImport_ImportModule("pyfuzzer.mutators.generic");
-
-        if (mutator_p == NULL) {
-            PyErr_Print();
-            exit(1);
-        }
-    }
-
-    *test_one_input_print_pp = PyObject_GetAttrString(mutator_p,
-                                                      "test_one_input_print");
-
-    if (*test_one_input_print_pp == NULL) {
-        PyErr_Print();
-        exit(1);
-    }
-}
+#include "pyfuzzer_common.h"
 
 static void *read_unit(const char *unit_path_p, Py_ssize_t *size_p)
 {
@@ -119,8 +83,7 @@ static void *read_unit(const char *unit_path_p, Py_ssize_t *size_p)
     return (buf_p);
 }
 
-static void print_unit(PyObject *module_p,
-                       PyObject *test_one_input_print_p,
+static void print_unit(PyObject *test_one_input_print_p,
                        const char *path_p)
 {
     PyObject *args_p;
@@ -131,22 +94,24 @@ static void print_unit(PyObject *module_p,
     printf("%s:\n", path_p);
 
     buf_p = read_unit(path_p, &size);
-    args_p = PyTuple_Pack(2,
-                          module_p,
-                          PyBytes_FromStringAndSize((const char *)buf_p, size));
+    args_p = PyTuple_Pack(1, PyBytes_FromStringAndSize((const char *)buf_p, size));
 
     if (args_p == NULL) {
         printf("Failed to create arguments.\n");
         exit(1);
     }
 
-    PyErr_Clear();
     res_p = PyObject_CallObject(test_one_input_print_p, args_p);
 
     if (res_p != NULL) {
         Py_DECREF(res_p);
     }
 
+    if (PyErr_Occurred()) {
+        PyErr_Print();
+    }
+
+    PyErr_Clear();
     free(buf_p);
 }
 
@@ -194,7 +159,6 @@ static char *strip(char *str_p, const char *strip_p)
 
 int main(int argc, const char *argv[])
 {
-    PyObject *module_p;
     PyObject *test_one_input_print_p;
     char path[256];
     char *path_p;
@@ -204,7 +168,7 @@ int main(int argc, const char *argv[])
         exit(1);
     }
 
-    init(&module_p, &test_one_input_print_p);
+    pyfuzzer_init(NULL, NULL, &test_one_input_print_p);
 
     while (true) {
         path_p = fgets(&path[0], sizeof(path), stdin);
@@ -213,7 +177,7 @@ int main(int argc, const char *argv[])
             break;
         }
 
-        print_unit(module_p, test_one_input_print_p, strip(path_p, NULL));
+        print_unit(test_one_input_print_p, strip(path_p, NULL));
     }
 
     return (0);

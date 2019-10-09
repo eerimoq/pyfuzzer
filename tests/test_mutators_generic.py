@@ -4,8 +4,7 @@ from unittest.mock import patch
 import struct
 from io import StringIO
 
-from pyfuzzer.mutators.generic import test_one_input
-from pyfuzzer.mutators.generic import test_one_input_print
+from pyfuzzer.mutators.generic import setup
 
 from . import c_extension
 
@@ -30,8 +29,10 @@ class MutatorsGenericTest(unittest.TestCase):
             (b'\x00\x03\x00' + struct.pack('>q', 2) + struct.pack('>q', 3), -1)
         ]
 
+        mutator = setup(c_extension)
+
         for data, res in datas:
-            self.assertEqual(test_one_input(c_extension, data), res)
+            self.assertEqual(mutator.test_one_input(data), res)
 
     def test_test_one_input_print(self):
         datas = [
@@ -43,10 +44,11 @@ class MutatorsGenericTest(unittest.TestCase):
         ]
 
         stdout = StringIO()
+        mutator = setup(c_extension)
 
         with patch('sys.stdout', stdout):
             for data in datas:
-                test_one_input_print(c_extension, data)
+                mutator.test_one_input_print(data)
 
         self.assertEqual(stdout.getvalue(),
                          '    add(1, 2) = 3\n'

@@ -24,40 +24,13 @@
  * SOFTWARE.
  */
 
-#include "pyfuzzer_common.h"
+#ifndef PYFUZZER_COMMON_H
+#define PYFUZZER_COMMON_H
 
-int LLVMFuzzerTestOneInput(const uint8_t *data_p, size_t size)
-{
-    static PyObject *test_one_input_p = NULL;
-    static PyObject *args_p;
-    PyObject *res_p;
-    PyObject *data_obj_p;
+#include <Python.h>
 
-    if (test_one_input_p == NULL) {
-        pyfuzzer_init(&test_one_input_p, &args_p, NULL);
-    }
+void pyfuzzer_init(PyObject **test_one_input_pp,
+                   PyObject **args_pp,
+                   PyObject **test_one_input_print_pp);
 
-    data_obj_p = PyBytes_FromStringAndSize((const char *)data_p, size);
-
-    if (data_obj_p == NULL) {
-        PyErr_Print();
-        exit(1);
-    }
-
-    PyTuple_SET_ITEM(args_p, 0, data_obj_p);
-    res_p = PyObject_CallObject(test_one_input_p, args_p);
-    Py_DECREF(data_obj_p);
-
-    if (res_p != NULL) {
-        /* printf("res: %s\n", PyUnicode_AsUTF8(PyObject_Str(res_p))); */
-        Py_DECREF(res_p);
-    }
-
-    /* if (PyErr_Occurred()) { */
-    /*     PyErr_Print(); */
-    /* } */
-
-    PyErr_Clear();
-
-    return (0);
-}
+#endif

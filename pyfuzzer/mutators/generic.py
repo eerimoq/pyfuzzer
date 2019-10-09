@@ -22,7 +22,7 @@ def format_args(args, limit):
     return ', '.join([format_value(arg, limit) for arg in args])
 
 
-def print_callable(obj, args, indent, limit=1024):
+def print_callable(obj, args, indent='    ', limit=1024):
     """Print given callable name and its arguments, call it and then print
     the returned value or raised exception.
 
@@ -174,6 +174,17 @@ class Mutator:
             1: self.test_one_class_print
         }
 
+    def test_one_input(self, data):
+        data = BytesIO(data)
+        kind = data.read(1)[0]
+
+        return self._attribute_kind[kind % len(self._attribute_kind)](data)
+
+    def test_one_input_print(self, data):
+        data = BytesIO(data)
+        kind = data.read(1)[0]
+        self._attribute_kind_print[kind % len(self._attribute_kind_print)](data)
+
     def lookup_function(self, value):
         if self._functions is None:
             self._functions = lookup_functions(self._module)
@@ -214,13 +225,13 @@ class Mutator:
     def test_one_function_print(self, data):
         func, signature = self.lookup_function(data.read(1)[0])
         args = generate_args(signature, data)
-        print_callable(func, args, 4 * ' ')
+        print_callable(func, args)
 
 
     def test_one_class_print(self, data):
         cls, signature, methods = self.lookup_class(data.read(1)[0])
         args = generate_args(signature, data)
-        obj = print_callable(cls, args, 4 * ' ')
+        obj = print_callable(cls, args)
 
         if obj is None:
             return
@@ -231,32 +242,6 @@ class Mutator:
                            [obj, *generate_args(signature, data)],
                            8 * ' ')
 
-    def test_one_input(self, data):
-        kind = data.read(1)[0]
 
-        return self._attribute_kind[kind % len(self._attribute_kind)](data)
-
-    def test_one_input_print(self, data):
-        kind = data.read(1)[0]
-        self._attribute_kind_print[kind % len(self._attribute_kind_print)](data)
-
-
-MUTATOR = None
-
-
-def test_one_input(module, data):
-    global MUTATOR
-
-    if MUTATOR is None:
-        MUTATOR = Mutator(module)
-
-    return MUTATOR.test_one_input(BytesIO(data))
-
-
-def test_one_input_print(module, data):
-    global MUTATOR
-
-    if MUTATOR is None:
-        MUTATOR = Mutator(module)
-
-    MUTATOR.test_one_input_print(BytesIO(data))
+def setup(module):
+    return Mutator(module)
