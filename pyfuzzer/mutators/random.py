@@ -57,13 +57,17 @@ DATA_KINDS = {
 }
 
 
+def is_function(member):
+    return inspect.isbuiltin(member) or inspect.isfunction(member)
+
+
 def lookup_function(module, value):
     global FUNCS
     global NUMBER_OF_FUNCS
 
     if FUNCS is None:
         FUNCS = [
-            m[1] for m in inspect.getmembers(module, inspect.isbuiltin)
+            m[1] for m in inspect.getmembers(module, is_function)
         ]
         NUMBER_OF_FUNCS = len(FUNCS)
 
@@ -116,7 +120,8 @@ def generate_args(data):
 def test_one_function(module, data):
     func = lookup_function(module, data.read(1)[0])
     args = generate_args(data)
-    func(*args)
+
+    return func(*args)
 
 
 def test_one_class(module, data):
@@ -127,6 +132,8 @@ def test_one_class(module, data):
     for _ in range(data.read(1)[0]):
         method = methods[data.read(1)[0] % len(methods)]
         method(obj, *generate_args(data))
+
+    return obj
 
 
 ATTRIBUTE_KIND = {
@@ -173,7 +180,8 @@ def test_one_input(module, data):
 
     data = BytesIO(data)
     kind = data.read(1)[0]
-    ATTRIBUTE_KIND[kind % len(ATTRIBUTE_KIND)](module, data)
+
+    return ATTRIBUTE_KIND[kind % len(ATTRIBUTE_KIND)](module, data)
 
 
 def test_one_input_print(module, data):

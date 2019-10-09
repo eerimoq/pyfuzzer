@@ -4,6 +4,7 @@ python:
   - "3.7"
 
 script:
+  - python setup.py test
   - (cd examples/hello_world &&
          PYTHONPATH=../.. python -m pyfuzzer clean &&
          PYTHONPATH=../.. python -m pyfuzzer run

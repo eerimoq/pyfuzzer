@@ -1,23 +1,22 @@
 import traceback
 
 
+def format_value(value, limit):
+    if isinstance(value, str):
+        value = f"'{value}'"
+    else:
+        value = str(value)
+
+    return value[:limit]
+
+
 def format_args(args, limit):
     """Returns a comma separated list of given arguemnts. Each argument is
     at most ``limit`` characters.
 
     """
 
-    sargs = []
-
-    for arg in args:
-        if isinstance(arg, str):
-            arg = f"'{arg}'"
-        else:
-            arg = str(arg)
-
-        sargs.append(arg[:limit])
-
-    return ', '.join(sargs)
+    return ', '.join([format_value(arg, limit) for arg in args])
 
 
 def print_callable(obj, args, indent, limit=1024):
@@ -34,7 +33,7 @@ def print_callable(obj, args, indent, limit=1024):
 
     try:
         res = obj(*args)
-        print(f' = {str(res)[:limit]}')
+        print(f' = {format_value(res, limit)}')
     except Exception:
         res = None
         print(' raises:')

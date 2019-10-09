@@ -126,6 +126,9 @@ def run(libfuzzer_arguments):
     env = os.environ.copy()
     env['LLVM_PROFILE_FILE'] = 'pyfuzzer.profraw'
     run_command(command, env=env)
+
+
+def print_coverage():
     run_command([
         'llvm-profdata',
         'merge',
@@ -146,14 +149,6 @@ def do_run(args):
     build(args.csources, args.cflag)
     build_print(args.csources, args.cflag)
     run(args.libfuzzer_argument)
-
-
-def array_to_bytes(string):
-    return bytes([
-        int(byte[2:], 16)
-        for byte in string.split(',')
-        if byte
-    ])
 
 
 def do_print_corpus(args):
@@ -185,6 +180,10 @@ def do_print_crashes(args):
             proc.check_returncode()
         except Exception as e:
             print(e)
+
+
+def do_print_coverage(_args):
+    print_coverage()
 
 
 def do_clean(_args):
@@ -234,6 +233,11 @@ def main():
     subparser.add_argument('modulename', help='C extension module name.')
     subparser.add_argument('csources', nargs='+', help='C extension source files.')
     subparser.set_defaults(func=do_run)
+
+    # The print_coverage subparser.
+    subparser = subparsers.add_parser('print_coverage',
+                                      description='Print code coverage.')
+    subparser.set_defaults(func=do_print_coverage)
 
     # The print_corpus subparser.
     subparser = subparsers.add_parser(
