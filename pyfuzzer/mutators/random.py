@@ -2,6 +2,7 @@ import sys
 import inspect
 from io import BytesIO
 import struct
+import inspect
 
 from .utils import print_callable
 
@@ -11,6 +12,13 @@ NUMBER_OF_FUNCS = 0
 
 CLASSES = None
 NUMBER_OF_CLASSES = 0
+
+
+def signature(callable):
+    try:
+        return inspect.signature(callable)
+    except Exception:
+        return None
 
 
 def generate_integer(data):
@@ -34,11 +42,11 @@ def generate_none(_data):
 
 
 def generate_list(data):
-    return generate_args(data)
+    return generate_args(None, data)
 
 
 def generate_dict(data):
-    return {value: value for value in generate_args(data)}
+    return {value: value for value in generate_args(None, data)}
 
 
 def generate_bytearray(data):
@@ -57,6 +65,11 @@ DATA_KINDS = {
 }
 
 
+DATA_KINDS_BY_ANNOTATION = {
+    int: generate_integer
+}
+
+
 def is_function(member):
     return inspect.isbuiltin(member) or inspect.isfunction(member)
 
@@ -67,7 +80,8 @@ def lookup_function(module, value):
 
     if FUNCS is None:
         FUNCS = [
-            m[1] for m in inspect.getmembers(module, is_function)
+            (m[1], signature(m[1]))
+            for m in inspect.getmembers(module, is_function)
         ]
         NUMBER_OF_FUNCS = len(FUNCS)
 
@@ -80,7 +94,7 @@ def lookup_function(module, value):
 
 def lookup_class_methods(cls):
     return [
-        m[1]
+        (m[1], signature(m[1]))
         for m in inspect.getmembers(cls)
         if m[0][0] != '_'
     ]
@@ -92,7 +106,7 @@ def lookup_class(module, value):
 
     if CLASSES is None:
         CLASSES = [
-            (cls, lookup_class_methods(cls))
+            (cls, signature(cls), lookup_class_methods(cls))
             for _, cls in inspect.getmembers(module, inspect.isclass)
         ]
         NUMBER_OF_CLASSES = len(CLASSES)
@@ -104,13 +118,29 @@ def lookup_class(module, value):
     return CLASSES[value % NUMBER_OF_CLASSES]
 
 
-def generate_args(data):
+def generate_args(signature, data):
     args = []
     number_of_args = data.read(1)[0]
 
     try:
-        for _ in range(number_of_args):
-            args.append(DATA_KINDS[data.read(1)[0] % len(DATA_KINDS)](data))
+        if signature is None:
+                for _ in range(number_of_args):
+                    args.append(DATA_KINDS[data.read(1)[0] % len(DATA_KINDS)](data))
+        else:
+            if number_of_args == 0:
+                for parameter in signature.parameters.values():
+                    if parameter.kind == inspect.Parameter.VAR_POSITIONAL:
+                        args += generate_args(None, data)
+                    else:
+                        if parameter.annotation in DATA_KINDS_BY_ANNOTATION:
+                            func = DATA_KINDS_BY_ANNOTATION[parameter.annotation]
+                        else:
+                            func = DATA_KINDS[data.read(1)[0] % len(DATA_KINDS)]
+
+                        args.append(func(data))
+            else:
+                for _ in range(number_of_args):
+                    args.append(DATA_KINDS[data.read(1)[0] % len(DATA_KINDS)](data))
     except Exception:
         pass
 
@@ -118,20 +148,20 @@ def generate_args(data):
 
 
 def test_one_function(module, data):
-    func = lookup_function(module, data.read(1)[0])
-    args = generate_args(data)
+    func, signature = lookup_function(module, data.read(1)[0])
+    args = generate_args(signature, data)
 
     return func(*args)
 
 
 def test_one_class(module, data):
-    cls, methods = lookup_class(module, data.read(1)[0])
-    args = generate_args(data)
+    cls, signature, methods = lookup_class(module, data.read(1)[0])
+    args = generate_args(signature, data)
     obj = cls(*args)
 
     for _ in range(data.read(1)[0]):
-        method = methods[data.read(1)[0] % len(methods)]
-        method(obj, *generate_args(data))
+        method, signature = methods[data.read(1)[0] % len(methods)]
+        method(obj, *generate_args(signature, data))
 
     return obj
 
@@ -143,24 +173,23 @@ ATTRIBUTE_KIND = {
 
 
 def test_one_function_print(module, data):
-    func = lookup_function(module, data.read(1)[0])
-    print('test_one_function_print')
-    args = generate_args(data)
+    func, signature = lookup_function(module, data.read(1)[0])
+    args = generate_args(signature, data)
     print_callable(func, args, 4 * ' ')
 
 
 def test_one_class_print(module, data):
-    cls, methods = lookup_class(module, data.read(1)[0])
-    args = generate_args(data)
+    cls, signature, methods = lookup_class(module, data.read(1)[0])
+    args = generate_args(signature, data)
     obj = print_callable(cls, args, 4 * ' ')
 
     if obj is None:
         return
 
     for _ in range(data.read(1)[0]):
-        method = methods[data.read(1)[0] % len(methods)]
+        method, signature = methods[data.read(1)[0] % len(methods)]
         print_callable(method,
-                       [obj, *generate_args(data)],
+                       [obj, *generate_args(signature, data)],
                        8 * ' ')
 
 
@@ -171,13 +200,6 @@ ATTRIBUTE_KIND_PRINT = {
 
 
 def test_one_input(module, data):
-    # C extension functions can not have type annotations. Can be part
-    # of function documentation though.
-    #
-    # print(inspect.signature(func))
-    #
-    # print(func.__doc__)
-
     data = BytesIO(data)
     kind = data.read(1)[0]
 

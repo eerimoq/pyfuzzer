@@ -14,11 +14,20 @@ class MutatorsRandomTest(unittest.TestCase):
 
     def test_test_one_input(self):
         datas = [
+            # add(1, 2) -> 3
             (b'\x00\x00\x02'
              + b'\x00' + struct.pack('>q', 1)
              + b'\x00' + struct.pack('>q', 2), 3),
+            # add(1, 2) -> 3 using signature.
+            (b'\x00\x00\x00'
+             + b'\x00' + struct.pack('>q', 1)
+             + b'\x00' + struct.pack('>q', 2), 3),
+            # func_0()
             (b'\x00\x01\x00', 'func 0'),
-            (b'\x00\x02\x00', 'func 1')
+            # func_1()
+            (b'\x00\x02\x00', 'func 1'),
+            # sub(2, 3) -> -1 using signature and annotations.
+            (b'\x00\x03\x00' + struct.pack('>q', 2) + struct.pack('>q', 3), -1)
         ]
 
         for data, res in datas:
@@ -40,11 +49,8 @@ class MutatorsRandomTest(unittest.TestCase):
                 test_one_input_print(c_extension, data)
 
         self.assertEqual(stdout.getvalue(),
-                         'test_one_function_print\n'
                          '    add(1, 2) = 3\n'
-                         'test_one_function_print\n'
                          "    func_0() = 'func 0'\n"
-                         'test_one_function_print\n'
                          "    func_1() = 'func 1'\n")
 
 

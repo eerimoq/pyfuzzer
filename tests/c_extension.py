@@ -8,3 +8,7 @@ def func_0():
 
 def func_1():
     return 'func 1'
+
+
+def sub(a: int, b: int):
+    return a - b

@@ -124,8 +124,6 @@ argument.
 Ideas
 =====
 
-- Use type annotations for less type errors in generic mutator.
-
 - Add support to fuzz test pure Python modules by generating C code
   using Cython.
 
