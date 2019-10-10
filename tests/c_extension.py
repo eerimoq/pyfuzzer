@@ -1,3 +1,18 @@
+class Counter:
+
+    def __init__(self):
+        self._counter = 0
+
+    def get(self):
+        return self._counter
+
+    def increment(self, value):
+        self._counter += value
+
+    def decrement(self, value):
+        self._counter -= value
+
+
 def add(a, b):
     return a + b
 

@@ -102,7 +102,7 @@ DATA_KINDS = {
 }
 
 
-def generate_args(signature, data):
+def generate_args(signature, data, is_method=False):
     args = []
     number_of_args = data.read(1)[0]
 
@@ -113,6 +113,11 @@ def generate_args(signature, data):
         else:
             if number_of_args == 0:
                 for parameter in signature.parameters.values():
+                    # Skip first parameter (self) for methods.
+                    if is_method:
+                        is_method = False
+                        continue
+
                     if parameter.kind == inspect.Parameter.VAR_POSITIONAL:
                         args += generate_args(None, data)
                     else:
@@ -218,7 +223,7 @@ class Mutator:
 
         for _ in range(data.read(1)[0]):
             method, signature = methods[data.read(1)[0] % len(methods)]
-            method(obj, *generate_args(signature, data))
+            method(obj, *generate_args(signature, data, True))
 
         return obj
 

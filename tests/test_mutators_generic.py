@@ -34,6 +34,22 @@ class MutatorsGenericTest(unittest.TestCase):
         for data, res in datas:
             self.assertEqual(mutator.test_one_input(data), res)
 
+    def test_test_one_input_counter(self):
+        mutator = setup(c_extension)
+
+        # counter = Counter()
+        # counter.get() = 0
+        # counter.increment(1)
+        # counter.decrement(2)
+        # counter.get() = -1
+        mutator.test_one_input(
+            b'\x01\x00\x00\x04'
+            b'\x01\x00'
+            b'\x02\x00\x00' + b'\x00\x00\x00\x00\x00\x00\x00\x01'
+            b'\x03\x00\x00' + b'\x00\x00\x00\x00\x00\x00\x00\x02'
+            b'\x01\x00'
+        )
+
     def test_test_one_input_print(self):
         datas = [
             (b'\x00\x00\x01\x02'
