@@ -27,7 +27,7 @@ class MutatorsGenericTest(unittest.TestCase):
             # func_1()
             (b'\x00\x02\x00', 'func 1'),
             # sub(2, 3) -> -1 using signature and annotations.
-            (b'\x00\x03\x00' + struct.pack('>q', 2) + struct.pack('>q', 3), -1)
+            (b'\x00\x04\x00' + struct.pack('>q', 2) + struct.pack('>q', 3), -1)
         ]
 
         mutator = setup(c_extension)
@@ -95,6 +95,69 @@ class MutatorsGenericTest(unittest.TestCase):
             "        increment(<tests.c_extension.Counter object at <address>>, 1) = None\n"
             "        decrement(<tests.c_extension.Counter object at <address>>, 2) = None\n"
             "        get(<tests.c_extension.Counter object at <address>>) = -1\n")
+
+    def test_test_one_input_noop(self):
+        datas = [
+            # int
+            (b'\x00\x03\x01\x01' + b'\x00' + struct.pack('>q', 5), 5),
+            # bool
+            (b'\x00\x03\x01\x01' + b'\x01\xff', True),
+            # str
+            (b'\x00\x03\x01\x01' + b'\x02\x03\x31\x32\x33', '123'),
+            # bytes
+            (b'\x00\x03\x01\x01' + b'\x03\x03\x31\x32\x33', b'123'),
+            # None
+            (b'\x00\x03\x01\x01' + b'\x04', None),
+            # list
+            (b'\x00\x03\x01\x01' + b'\x05\x00', []),
+            # dict
+            (b'\x00\x03\x01\x01' + b'\x06\x00', {}),
+            # bytearray
+            (b'\x00\x03\x01\x01' + b'\x07\x03', bytearray(b'\x00\x00\x00'))
+        ]
+
+        mutator = setup(c_extension)
+
+        for data, res in datas:
+            self.assertEqual(mutator.test_one_input(data), res)
+
+    def test_test_one_input_print_noop(self):
+        datas = [
+            # int
+            b'\x00\x03\x01\x01' + b'\x00' + struct.pack('>q', 5),
+            # bool
+            b'\x00\x03\x01\x01' + b'\x01\xff',
+            # str
+            b'\x00\x03\x01\x01' + b'\x02\x03\x31\x32\x33',
+            # bytes
+            b'\x00\x03\x01\x01' + b'\x03\x03\x31\x32\x33',
+            # None
+            b'\x00\x03\x01\x01' + b'\x04',
+            # list
+            b'\x00\x03\x01\x01' + b'\x05\x00',
+            # dict
+            b'\x00\x03\x01\x01' + b'\x06\x00',
+            # bytearray
+            b'\x00\x03\x01\x01' + b'\x07\x03'
+        ]
+
+        stdout = StringIO()
+        mutator = setup(c_extension)
+
+        with patch('sys.stdout', stdout):
+            for data in datas:
+                mutator.test_one_input_print(data)
+
+        self.assertEqual(
+            stdout.getvalue(),
+            "    noop(5) = 5\n"
+            "    noop(True) = True\n"
+            "    noop('123') = '123'\n"
+            "    noop(b'123') = b'123'\n"
+            "    noop(None) = None\n"
+            "    noop([]) = []\n"
+            "    noop({}) = {}\n"
+            "    noop(bytearray(b'\\x00\\x00\\x00')) = bytearray(b'\\x00\\x00\\x00')\n")
 
 
 if __name__ == '__main__':

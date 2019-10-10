@@ -25,5 +25,9 @@ def func_1():
     return 'func 1'
 
 
+def noop(v):
+    return v
+
+
 def sub(a: int, b: int):
     return a - b
