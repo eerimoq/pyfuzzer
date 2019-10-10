@@ -80,7 +80,7 @@ def generate_dict(data):
 
 
 def get_signature(callable):
-    """Get the signature for given callable.
+    """Get the signature of given callable.
 
     """
 
@@ -168,8 +168,6 @@ class Mutator:
 
     def __init__(self, module):
         self._module = module
-        self._functions = None
-        self._classes = None
         self._attribute_kind = {
             0: self.test_one_function,
             1: self.test_one_class
@@ -178,46 +176,28 @@ class Mutator:
             0: self.test_one_function_print,
             1: self.test_one_class_print
         }
+        self._functions = lookup_functions(module)
+        self._classes = lookup_classes(module)
 
     def test_one_input(self, data):
         data = BytesIO(data)
-        kind = data.read(1)[0]
+        kind = (data.read(1)[0] % len(self._attribute_kind))
 
-        return self._attribute_kind[kind % len(self._attribute_kind)](data)
+        return self._attribute_kind[kind](data)
 
     def test_one_input_print(self, data):
         data = BytesIO(data)
-        kind = data.read(1)[0]
-        self._attribute_kind_print[kind % len(self._attribute_kind_print)](data)
-
-    def lookup_function(self, value):
-        if self._functions is None:
-            self._functions = lookup_functions(self._module)
-
-            if len(self._functions) > 256:
-                print('More than 256 functions.')
-                sys.exit(1)
-
-        return self._functions[value % len(self._functions)]
-
-    def lookup_class(self, value):
-        if self._classes is None:
-            self._classes = lookup_classes(self._module)
-
-            if len(self._classes) > 256:
-                print('More than 256 classes.')
-                sys.exit(1)
-
-        return self._classes[value % len(self._classes)]
+        kind = (data.read(1)[0] % len(self._attribute_kind_print))
+        self._attribute_kind_print[kind](data)
 
     def test_one_function(self, data):
-        func, signature = self.lookup_function(data.read(1)[0])
+        func, signature = self._functions[data.read(1)[0] % len(self._functions)]
         args = generate_args(signature, data)
 
         return func(*args)
 
     def test_one_class(self, data):
-        cls, signature, methods = self.lookup_class(data.read(1)[0])
+        cls, signature, methods = self._classes[data.read(1)[0] % len(self._classes)]
         args = generate_args(signature, data)
         obj = cls(*args)
 
@@ -228,13 +208,12 @@ class Mutator:
         return obj
 
     def test_one_function_print(self, data):
-        func, signature = self.lookup_function(data.read(1)[0])
+        func, signature = self._functions[data.read(1)[0] % len(self._functions)]
         args = generate_args(signature, data)
         print_callable(func, args)
 
-
     def test_one_class_print(self, data):
-        cls, signature, methods = self.lookup_class(data.read(1)[0])
+        cls, signature, methods = self._classes[data.read(1)[0] % len(self._classes)]
         args = generate_args(signature, data)
         obj = print_callable(cls, args)
 
