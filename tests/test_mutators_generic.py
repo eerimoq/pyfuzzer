@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import patch
 import struct
 from io import StringIO
+import re
 
 from pyfuzzer.mutators.generic import setup
 
@@ -34,22 +35,6 @@ class MutatorsGenericTest(unittest.TestCase):
         for data, res in datas:
             self.assertEqual(mutator.test_one_input(data), res)
 
-    def test_test_one_input_counter(self):
-        mutator = setup(c_extension)
-
-        # counter = Counter()
-        # counter.get() = 0
-        # counter.increment(1)
-        # counter.decrement(2)
-        # counter.get() = -1
-        mutator.test_one_input(
-            b'\x01\x00\x00\x04'
-            b'\x01\x00'
-            b'\x02\x00\x00' + b'\x00\x00\x00\x00\x00\x00\x00\x01'
-            b'\x03\x00\x00' + b'\x00\x00\x00\x00\x00\x00\x00\x02'
-            b'\x01\x00'
-        )
-
     def test_test_one_input_print(self):
         datas = [
             (b'\x00\x00\x01\x02'
@@ -70,6 +55,46 @@ class MutatorsGenericTest(unittest.TestCase):
                          '    add(1, 2) = 3\n'
                          "    func_0() = 'func 0'\n"
                          "    func_1() = 'func 1'\n")
+
+    def test_test_one_input_counter(self):
+        mutator = setup(c_extension)
+
+        # counter = Counter()
+        # counter.get() = 0
+        # counter.increment(1)
+        # counter.decrement(2)
+        # counter.get() = -1
+        mutator.test_one_input(
+            b'\x01\x00\x00\x04'
+            b'\x01\x00'
+            b'\x02\x00\x00' + b'\x00\x00\x00\x00\x00\x00\x00\x01'
+            b'\x03\x00\x00' + b'\x00\x00\x00\x00\x00\x00\x00\x02'
+            b'\x01\x00'
+        )
+
+    def test_test_one_input_print_counter(self):
+        stdout = StringIO()
+        mutator = setup(c_extension)
+
+        with patch('sys.stdout', stdout):
+            mutator.test_one_input_print(
+                b'\x01\x00\x00\x04'
+                b'\x01\x00'
+                b'\x02\x00\x00' + b'\x00\x00\x00\x00\x00\x00\x00\x01'
+                b'\x03\x00\x00' + b'\x00\x00\x00\x00\x00\x00\x00\x02'
+                b'\x01\x00')
+
+        output = re.sub(r'object at 0x[0-9a-f]+',
+                        'object at <address>',
+                        stdout.getvalue())
+
+        self.assertEqual(
+            output,
+            "    Counter() = <tests.c_extension.Counter object at <address>>\n"
+            "        get(<tests.c_extension.Counter object at <address>>) = 0\n"
+            "        increment(<tests.c_extension.Counter object at <address>>, 1) = None\n"
+            "        decrement(<tests.c_extension.Counter object at <address>>, 2) = None\n"
+            "        get(<tests.c_extension.Counter object at <address>>) = -1\n")
 
 
 if __name__ == '__main__':

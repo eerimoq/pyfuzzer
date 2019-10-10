@@ -244,7 +244,7 @@ class Mutator:
         for _ in range(data.read(1)[0]):
             method, signature = methods[data.read(1)[0] % len(methods)]
             print_callable(method,
-                           [obj, *generate_args(signature, data)],
+                           [obj, *generate_args(signature, data, True)],
                            8 * ' ')
 
 
