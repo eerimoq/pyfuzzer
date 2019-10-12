@@ -323,7 +323,7 @@ class Mutator:
         args = generate_args(signature, data)
         obj = cls(*args)
 
-        for _ in range(data.read(1)[0]):
+        for _ in range(min(data.read(1)[0], 5)):
             method, signature = methods[data.read(1)[0] % len(methods)]
             method(obj, *generate_args(signature, data, True))
 
@@ -342,7 +342,7 @@ class Mutator:
         if obj is None:
             return
 
-        for _ in range(data.read(1)[0]):
+        for _ in range(min(data.read(1)[0], 5)):
             method, signature = methods[data.read(1)[0] % len(methods)]
             print_callable(method,
                            [obj, *generate_args(signature, data, True)],
