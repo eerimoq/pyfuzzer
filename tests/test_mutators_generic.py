@@ -12,6 +12,8 @@ from . import c_extension
 
 class MutatorsGenericTest(unittest.TestCase):
 
+    maxDiff = None
+    
     def test_test_one_input(self):
         datas = [
             # add(1, 2) -> 3
@@ -49,7 +51,7 @@ class MutatorsGenericTest(unittest.TestCase):
 
         with patch('sys.stdout', stdout):
             for data in datas:
-                mutator.test_one_input_print(data)
+                mutator.test_one_input_print(data, colors=False)
 
         self.assertEqual(stdout.getvalue(),
                          '    add(1, 2) = 3\n'
@@ -82,7 +84,8 @@ class MutatorsGenericTest(unittest.TestCase):
                 b'\x01\x00'
                 b'\x02\x00\x00' + b'\x00\x00\x00\x00\x00\x00\x00\x01'
                 b'\x03\x00\x00' + b'\x00\x00\x00\x00\x00\x00\x00\x02'
-                b'\x01\x00')
+                b'\x01\x00',
+                colors=False)
 
         output = re.sub(r'object at 0x[0-9a-f]+',
                         'object at <address>',
@@ -146,7 +149,7 @@ class MutatorsGenericTest(unittest.TestCase):
 
         with patch('sys.stdout', stdout):
             for data in datas:
-                mutator.test_one_input_print(data)
+                mutator.test_one_input_print(data, colors=False)
 
         self.assertEqual(
             stdout.getvalue(),

@@ -25,6 +25,9 @@ setup(name='pyfuzzer',
       keywords=['fuzz', 'fuzzying', 'test'],
       url='https://github.com/eerimoq/pyfuzzer',
       packages=find_packages(exclude=['tests']),
+      install_requires=[
+          'Pygments'
+      ],
       test_suite="tests",
       include_package_data=True,
       entry_points = {
