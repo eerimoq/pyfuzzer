@@ -140,8 +140,6 @@ Ideas
 - Add support to fuzz test pure Python modules by generating C code
   using Cython.
 
-- Colors!
-
 .. |buildstatus| image:: https://travis-ci.org/eerimoq/pyfuzzer.svg
 .. _buildstatus: https://travis-ci.org/eerimoq/pyfuzzer
 
