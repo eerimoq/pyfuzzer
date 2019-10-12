@@ -147,7 +147,13 @@ def print_coverage():
 
 
 def do_run(args):
-    generate(args.modulename, args.mutator)
+    if args.module_name is None:
+        filename = os.path.basename(args.csources[0])
+        module_name = os.path.splitext(filename)[0]
+    else:
+        module_name = args.module_name
+
+    generate(module_name, args.mutator)
     build(args.csources, args.cflag)
     build_print(args.csources, args.cflag)
     run(args.libfuzzer_argument)
@@ -228,7 +234,10 @@ def main():
         default=[],
         help=("Add a C extension compilation flag without its leading '-'. If "
               "given, all default sanitizers are removed."))
-    subparser.add_argument('modulename', help='C extension module name.')
+    subparser.add_argument(
+        '-M', '--module-name',
+        help=('C extension module name, or first C source filename without '
+              'extension if not given.'))
     subparser.add_argument('csources', nargs='+', help='C extension source files.')
     subparser.set_defaults(func=do_run)
 
