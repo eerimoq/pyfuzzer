@@ -34,7 +34,7 @@ module ``hello_world``.
 Print the function calls that found new code paths. This information
 is usually useful when writing unit tests.
 
-.. code-block:: python
+.. code-block:: text
 
    $ pyfuzzer print_corpus
    corpus/25409981b15b978c9fb5a5a2f4dab0c4b04e295f:
@@ -74,7 +74,7 @@ first argument.
 Print the function call that caused the crash. Just as expected, the
 first argument is clearly longer than 2 bytes.
 
-.. code-block:: python
+.. code-block:: text
 
    $ pyfuzzer print_crashes
    crash-1013ed88cd71fd14407b2bdbc17b95d7bc317c21:
