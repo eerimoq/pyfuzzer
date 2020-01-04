@@ -67,7 +67,7 @@ def build(csources, cflags):
         '-fcoverage-mapping',
         '-g',
         '-fsanitize=fuzzer',
-	'-DCYTHON_PEP489_MULTI_PHASE_INIT=0'
+        '-DCYTHON_PEP489_MULTI_PHASE_INIT=0'
     ]
 
     if cflags:
@@ -101,6 +101,9 @@ def build(csources, cflags):
 
 def build_print(csources, cflags):
     command = ['clang']
+    command += [
+        '-DCYTHON_PEP489_MULTI_PHASE_INIT=0'
+    ]
     command += format_cflags(cflags)
     command += includes()
     command += csources
