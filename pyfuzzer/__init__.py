@@ -66,7 +66,8 @@ def build(csources, cflags):
         '-fprofile-instr-generate',
         '-fcoverage-mapping',
         '-g',
-        '-fsanitize=fuzzer'
+        '-fsanitize=fuzzer',
+	'-DCYTHON_PEP489_MULTI_PHASE_INIT=0'
     ]
 
     if cflags:

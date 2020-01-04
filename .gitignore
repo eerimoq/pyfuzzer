@@ -105,8 +105,10 @@ venv.bak/
 
 examples/*/module.c
 examples/*/pyfuzzer
+examples/*/pyfuzzer_print
 examples/*/pyfuzzer_print_corpus
 examples/*/mutator.py
+examples/hello_world_cython/hello_world.c
 *.profdata
 *.profraw
 crash-*
