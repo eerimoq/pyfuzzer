@@ -261,7 +261,9 @@ def generate_args(signature, data, is_method=False):
 
 
 def is_function(member):
-    return inspect.isbuiltin(member) or inspect.isfunction(member)
+    return (inspect.isbuiltin(member)
+            or inspect.isfunction(member)
+            or type(member).__name__ == 'cython_function_or_method')
 
 
 def lookup_functions(module):
