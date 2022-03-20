@@ -126,7 +126,7 @@ argument.
            self._module = module
 
        def test_one_input(self, data):
-           return module.crc_32(data)
+           return self._module.crc_32(data)
 
        def test_one_input_print(self, data):
            print_callable(self._module.crc_32, [data])
